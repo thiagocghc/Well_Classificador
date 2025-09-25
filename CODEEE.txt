@@ -1,0 +1,563 @@
+PAGINA INICIAL
+import HomePage from "@/components/HomePage";
+
+export default function Page() {
+  return <HomePage />;
+}
+
+
+src/components/
+
+Navbar.tsx
+
+FilterBar.tsx
+
+QuestionCard.tsx
+
+QuestionModal.tsx
+
+HomePage.tsx
+
+ClassificarPage.tsx
+
+SobrePage.tsx
+
+src/hooks/useCsvData.ts (carrega o CSV da pasta public)
+
+src/lib/csv.ts (parser CSV e PATH_CSV)
+
+src/types/questao.ts (tipo da questão)
+
+Páginas prontas:
+
+src/app/page.tsx (Explorar com sidebar = 20% + cards)
+
+src/app/classificar/page.tsx
+
+src/app/sobre/page.tsx
+
+observações importantes:
+
+Coloque o dataset em public/dataset/questoes.csv (ou ajuste PATH_CSV em src/lib/csv.ts).
+
+Componentes com hooks têm "use client" no topo.
+
+Tailwind: garanta que o content do tailwind.config.js inclui ./src/**/*.{ts,tsx}.
+
+
+/* ===============================
+   📁 Estrutura sugerida (Next.js App Router)
+   ===============================
+   public/
+     dataset/questoes.csv
+   src/
+     app/
+       page.tsx
+       classificar/page.tsx
+       sobre/page.tsx
+     components/
+       Navbar.tsx
+       FilterBar.tsx
+       QuestionCard.tsx
+       QuestionModal.tsx
+       HomePage.tsx
+       ClassificarPage.tsx
+       SobrePage.tsx
+     hooks/
+       useCsvData.ts
+     lib/
+       csv.ts
+     types/
+       questao.ts
+*/
+
+/* ===============================
+   FILE: src/types/questao.ts
+   =============================== */
+export type Questao = {
+  id: string | number;
+  ano: string;
+  nivel: string;
+  fase: string;
+  classe: string;
+  titulo?: string;
+  enunciado?: string;
+  textoCompleto?: string;
+};
+
+/* ===============================
+   FILE: src/lib/csv.ts
+   =============================== */
+export const PATH_CSV = "/dataset/questoes.csv"; // coloque o CSV em public/dataset/questoes.csv
+
+// Split por vírgulas que não estejam entre aspas
+const CSV_SPLIT_RE = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/;
+
+export function csvToJson<T = any>(csvText: string): T[] {
+  const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0);
+  if (lines.length <= 1) return [];
+  const headers = lines[0].split(CSV_SPLIT_RE).map((h) => stripQuotes(h.trim()));
+  return lines.slice(1).map((line, idx) => {
+    const cols = line.split(CSV_SPLIT_RE).map((c) => stripQuotes(c.trim()));
+    const obj: any = {};
+    headers.forEach((h, i) => (obj[h] = cols[i] ?? ""));
+    obj.id = obj.id || idx + 1;
+    return obj as T;
+  });
+}
+
+function stripQuotes(s: string) {
+  if (s.startsWith('"') && s.endsWith('"')) return s.slice(1, -1);
+  if (s.startsWith("'") && s.endsWith("'")) return s.slice(1, -1);
+  return s;
+}
+
+/* ===============================
+   FILE: src/hooks/useCsvData.ts
+   =============================== */
+"use client";
+import { useEffect, useState } from "react";
+import { csvToJson, PATH_CSV } from "@/lib/csv";
+import type { Questao } from "@/types/questao";
+
+export function useCsvData() {
+  const [data, setData] = useState<Questao[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const run = async () => {
+      setLoaded(false);
+      setError(null);
+      try {
+        const res = await fetch(PATH_CSV, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const txt = await res.text();
+        const json = csvToJson<Questao>(txt);
+        if (alive) setData(json);
+      } catch (e: any) {
+        if (alive) setError(String(e?.message || e));
+        if (alive) setData([]);
+      } finally {
+        if (alive) setLoaded(true);
+      }
+    };
+    run();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return { data, loaded, error };
+}
+
+/* ===============================
+   FILE: src/components/ui.tsx (pequenos átomos reutilizáveis)
+   =============================== */
+"use client";
+import React from "react";
+
+export function Badge({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs text-gray-700 border-gray-200 bg-gray-50">
+      {children}
+    </span>
+  );
+}
+
+export function Input({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string; }) {
+  return (
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-300"
+    />
+  );
+}
+
+export function Select({ value, onChange, options, placeholder }: { value: string; onChange: (v: string) => void; options: string[]; placeholder?: string; }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 outline-none focus:ring-2 focus:ring-gray-300"
+    >
+      <option value="">{placeholder || "Todos"}</option>
+      {options.map((op) => (
+        <option key={op} value={op}>{op}</option>
+      ))}
+    </select>
+  );
+}
+
+export function Button({ children, onClick, variant = "default", type = "button" }: { children: React.ReactNode; onClick?: () => void; variant?: "default" | "outline" | "ghost"; type?: "button" | "submit"; }) {
+  const styles =
+    variant === "outline"
+      ? "border border-gray-300 bg-white hover:bg-gray-50"
+      : variant === "ghost"
+      ? "bg-transparent hover:bg-gray-100"
+      : "bg-black text-white hover:bg-gray-900";
+  return (
+    <button type={type} onClick={onClick} className={`rounded-xl px-3 py-2 text-sm transition ${styles}`}>
+      {children}
+    </button>
+  );
+}
+
+/* ===============================
+   FILE: src/components/Navbar.tsx
+   =============================== */
+"use client";
+import React from "react";
+import Link from "next/link";
+
+export default function Navbar() {
+  const items = [
+    { href: "/", label: "Explorar" },
+    { href: "/classificar", label: "Classificar" },
+    { href: "/sobre", label: "Sobre" },
+  ];
+  return (
+    <nav className="sticky top-0 z-20 border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <div className="mx-auto max-w-5xl px-4 py-3 flex items-center justify-between">
+        <div className="text-lg font-semibold tracking-tight">OBI Classifier</div>
+        <div className="flex gap-1">
+          {items.map((it) => (
+            <Link key={it.href} href={it.href} className="px-3 py-1.5 rounded-full text-sm border bg-white text-gray-700 hover:bg-gray-100 border-gray-200">
+              {it.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+/* ===============================
+   FILE: src/components/QuestionCard.tsx
+   =============================== */
+"use client";
+import React from "react";
+import type { Questao } from "@/types/questao";
+import { Badge, Button } from "@/components/ui";
+
+export default function QuestionCard({ q, onOpen }: { q: Questao; onOpen: (q: Questao) => void }) {
+  return (
+    <article className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <Badge>{q.ano}</Badge>
+        <Badge>{q.nivel}</Badge>
+        <Badge>{q.fase}</Badge>
+        <Badge>{q.classe}</Badge>
+      </div>
+      <h3 className="text-base font-semibold text-gray-900">{q.titulo || `Questão ${q.id}`}</h3>
+      {q.enunciado && (
+        <p className="mt-1 text-sm text-gray-700 line-clamp-3">{q.enunciado}</p>
+      )}
+      <div className="mt-3 flex items-center gap-2">
+        <Button onClick={() => onOpen(q)}>Ver mais</Button>
+      </div>
+    </article>
+  );
+}
+
+/* ===============================
+   FILE: src/components/QuestionModal.tsx
+   =============================== */
+"use client";
+import React from "react";
+import type { Questao } from "@/types/questao";
+import { Badge, Button } from "@/components/ui";
+
+export default function QuestionModal({ open, onClose, questao }: { open: boolean; onClose: () => void; questao?: Questao | null; }) {
+  if (!open || !questao) return null;
+  return (
+    <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/40 p-2">
+      <div className="w-full max-w-2xl rounded-2xl bg-white p-4 sm:p-6 shadow-xl">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold">{questao.titulo || `Questão ${questao.id}`}</h3>
+            <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-600">
+              <Badge>{questao.ano}</Badge>
+              <Badge>{questao.nivel}</Badge>
+              <Badge>{questao.fase}</Badge>
+              <Badge>{questao.classe}</Badge>
+            </div>
+          </div>
+          <Button variant="ghost" onClick={onClose}>✕</Button>
+        </div>
+        <div className="mt-4 max-h-[60vh] overflow-auto pr-1 text-sm text-gray-800">
+          <p>{questao.textoCompleto || questao.enunciado || "(Sem texto completo)"}</p>
+        </div>
+        <div className="mt-6 flex justify-end">
+          <Button variant="outline" onClick={onClose}>Fechar</Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ===============================
+   FILE: src/components/FilterBar.tsx
+   =============================== */
+"use client";
+import React, { useMemo } from "react";
+import type { Questao } from "@/types/questao";
+import { Button, Input, Select } from "@/components/ui";
+import { PATH_CSV } from "@/lib/csv";
+
+export default function FilterBar({ raw, filters, setFilters, search, setSearch }: { raw: Questao[]; filters: { ano: string; nivel: string; fase: string; classe: string }; setFilters: (p: any) => void; search: string; setSearch: (v: string) => void; }) {
+  const anos = useMemo(() => Array.from(new Set(raw.map((q) => q.ano))).sort(), [raw]);
+  const niveis = useMemo(() => Array.from(new Set(raw.map((q) => q.nivel))).sort(), [raw]);
+  const fases = useMemo(() => Array.from(new Set(raw.map((q) => q.fase))).sort(), [raw]);
+  const classes = useMemo(() => Array.from(new Set(raw.map((q) => q.classe))).sort(), [raw]);
+
+  return (
+    <section className="rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
+      <h3 className="text-sm font-semibold mb-2">Filtros</h3>
+      <div className="flex flex-col gap-3">
+        <Select value={filters.ano} onChange={(v) => setFilters((s: any) => ({ ...s, ano: v }))} options={anos} placeholder="Ano" />
+        <Select value={filters.nivel} onChange={(v) => setFilters((s: any) => ({ ...s, nivel: v }))} options={niveis} placeholder="Nível" />
+        <Select value={filters.fase} onChange={(v) => setFilters((s: any) => ({ ...s, fase: v }))} options={fases} placeholder="Fase" />
+        <Select value={filters.classe} onChange={(v) => setFilters((s: any) => ({ ...s, classe: v }))} options={classes} placeholder="Classe" />
+        <Input value={search} onChange={setSearch} placeholder="Buscar por título/enunciado..." />
+        <Button variant="outline" onClick={() => setFilters({ ano: "", nivel: "", fase: "", classe: "" })}>Limpar filtros</Button>
+      </div>
+      <p className="mt-3 text-[11px] text-gray-500">Fonte: {PATH_CSV}</p>
+    </section>
+  );
+}
+
+/* ===============================
+   FILE: src/components/HomePage.tsx
+   =============================== */
+"use client";
+import React, { useEffect, useMemo, useState } from "react";
+import type { Questao } from "@/types/questao";
+import { useCsvData } from "@/hooks/useCsvData";
+import FilterBar from "@/components/FilterBar";
+import QuestionCard from "@/components/QuestionCard";
+import QuestionModal from "@/components/QuestionModal";
+
+export default function HomePage() {
+  const { data: raw, loaded, error } = useCsvData();
+  const [filters, setFilters] = useState({ ano: "", nivel: "", fase: "", classe: "" });
+  const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState<Questao | null>(null);
+
+  useEffect(() => {
+    setFilters({ ano: "", nivel: "", fase: "", classe: "" });
+    setSearch("");
+  }, [raw.length]);
+
+  const filtered = useMemo(() => {
+    return raw
+      .filter((q) => (filters.ano ? q.ano === filters.ano : true))
+      .filter((q) => (filters.nivel ? q.nivel === filters.nivel : true))
+      .filter((q) => (filters.fase ? q.fase === filters.fase : true))
+      .filter((q) => (filters.classe ? q.classe === filters.classe : true))
+      .filter((q) => {
+        const hay = `${q.titulo || ""} ${q.enunciado || ""}`.toLowerCase();
+        return hay.includes(search.toLowerCase());
+      });
+  }, [raw, filters, search]);
+
+  return (
+    <div className="space-y-4">
+      {/* Layout: sidebar (20%) + cards (80%) em telas grandes */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <aside className="lg:col-span-1 lg:sticky lg:top-20 self-start">
+          <FilterBar raw={raw} filters={filters} setFilters={setFilters} search={search} setSearch={setSearch} />
+        </aside>
+
+        <section className="lg:col-span-4">
+          <div className="mb-2 flex items-center justify-between text-xs sm:text-sm text-gray-600">
+            <span>
+              <b>{filtered.length}</b> resultado(s)
+              {!loaded ? " • carregando…" : ""}
+              {error ? ` • erro ao carregar: ${error}` : ""}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {filtered.map((q) => (
+              <QuestionCard key={q.id} q={q} onOpen={(qq) => { setActive(qq); setOpen(true); }} />
+            ))}
+            {loaded && filtered.length === 0 && (
+              <div className="col-span-full rounded-2xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-600">
+                Nenhuma questão encontrada com os filtros atuais.
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+
+      <QuestionModal open={open} onClose={() => setOpen(false)} questao={active} />
+    </div>
+  );
+}
+
+/* ===============================
+   FILE: src/components/ClassificarPage.tsx
+   =============================== */
+"use client";
+import React, { useState } from "react";
+import { Badge, Button } from "@/components/ui";
+
+export default function ClassificarPage() {
+  const [texto, setTexto] = useState("");
+  const [resultado, setResultado] = useState<{ classe: string; confianca: number } | null>(null);
+
+  const handleClassificar = () => {
+    if (!texto.trim()) return;
+    const t = texto.toLowerCase();
+    let classe = "outros";
+    if (/(ordem|primeiro|antes|depois|fila|posição)/.test(t)) classe = "ordenacao";
+    else if (/(grupo|times|agrupar|distribuir|categorias)/.test(t)) classe = "agrupamento";
+    setResultado({ classe, confianca: 0.73 });
+  };
+
+  return (
+    <div className="space-y-4">
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold">Classificar nova questão</h2>
+        <p className="mt-1 text-sm text-gray-600">
+          Cole o enunciado abaixo e clique em <b>Classificar</b>. Nesta demo, usamos uma heurística local.
+          No projeto real, conectaremos com sua API/serviço de ML.
+        </p>
+        <textarea
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          rows={6}
+          placeholder="Cole aqui o texto da questão..."
+          className="mt-3 w-full resize-y rounded-xl border border-gray-200 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-gray-300"
+        />
+        <div className="mt-3 flex items-center gap-2">
+          <Button onClick={handleClassificar}>Classificar</Button>
+          <Button variant="outline" onClick={() => { setTexto(""); setResultado(null); }}>Limpar</Button>
+        </div>
+      </section>
+
+      {resultado && (
+        <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <h3 className="text-base font-semibold">Resultado</h3>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <Badge>Classe: <b className="ml-1 capitalize">{resultado.classe}</b></Badge>
+            <Badge>Confiança: {(resultado.confianca * 100).toFixed(0)}%</Badge>
+          </div>
+          <p className="mt-3 text-sm text-gray-700">Prévia do texto:</p>
+          <p className="mt-1 text-sm text-gray-800 whitespace-pre-wrap">{texto}</p>
+        </section>
+      )}
+    </div>
+  );
+}
+
+/* ===============================
+   FILE: src/components/SobrePage.tsx
+   =============================== */
+"use client";
+import React from "react";
+
+export default function SobrePage() {
+  return (
+    <div className="space-y-4">
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <h2 className="text-lg font-semibold">Sobre o Projeto</h2>
+        <p className="mt-2 text-sm text-gray-700">
+          Interface mobile-first em Next.js para explorar e classificar questões. A aba Explorar filtra por <b>ano</b>, <b>nível</b>, <b>fase</b> e <b>classe</b>,
+          exibindo cards com acesso ao texto completo via modal. A aba Classificar recebe um texto e mostra um resultado – conecte com sua API de ML.
+        </p>
+        <ul className="mt-3 list-disc pl-5 text-sm text-gray-700">
+          <li>Arquitetura: Next.js (App Router) + Tailwind CSS.</li>
+          <li>Dataset carregado do próprio projeto (public/).</li>
+          <li>Componentes reutilizáveis, design limpo e responsivo.</li>
+        </ul>
+      </section>
+
+      <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+        <h3 className="text-base font-semibold">Próximos passos sugeridos</h3>
+        <ol className="mt-2 list-decimal pl-5 text-sm text-gray-700 space-y-1">
+          <li>Substituir parser por PapaParse para CSVs complexos.</li>
+          <li>Adicionar paginação ou infinite scroll para muitos registros.</li>
+          <li>Extrair componentes para /components e criar store global (Zustand/Context).</li>
+          <li>Integrar Classificar com API (POST /api/classificar).</li>
+          <li>Adicionar testes (Vitest/RTL) e melhorias de acessibilidade.</li>
+        </ol>
+      </section>
+    </div>
+  );
+}
+
+/* ===============================
+   FILE: src/app/page.tsx
+   =============================== */
+import Navbar from "@/components/Navbar";
+import HomePage from "@/components/HomePage";
+
+export default function Page() {
+  return (
+    <main className="min-h-dvh bg-gradient-to-b from-gray-50 to-white text-gray-900">
+      {/* Navbar é client component */}
+      {/* @ts-expect-error Async Server Component boundary com client child */}
+      <Navbar />
+      <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-8">
+        <header className="mb-4">
+          <h1 className="text-2xl font-bold tracking-tight">Sistema de Classificação de Questões</h1>
+          <p className="mt-1 text-sm text-gray-600">Explorar • Filtrar • Visualizar</p>
+        </header>
+        {/* @ts-expect-error client component */}
+        <HomePage />
+      </div>
+    </main>
+  );
+}
+
+/* ===============================
+   FILE: src/app/classificar/page.tsx
+   =============================== */
+import Navbar from "@/components/Navbar";
+import ClassificarPage from "@/components/ClassificarPage";
+
+export default function Page() {
+  return (
+    <main className="min-h-dvh bg-gradient-to-b from-gray-50 to-white text-gray-900">
+      {/* @ts-expect-error client component */}
+      <Navbar />
+      <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-8">
+        <header className="mb-4">
+          <h1 className="text-2xl font-bold tracking-tight">Classificar Questão</h1>
+          <p className="mt-1 text-sm text-gray-600">Cole o enunciado e obtenha a classe</p>
+        </header>
+        {/* @ts-expect-error client component */}
+        <ClassificarPage />
+      </div>
+    </main>
+  );
+}
+
+/* ===============================
+   FILE: src/app/sobre/page.tsx
+   =============================== */
+import Navbar from "@/components/Navbar";
+import SobrePage from "@/components/SobrePage";
+
+export default function Page() {
+  return (
+    <main className="min-h-dvh bg-gradient-to-b from-gray-50 to-white text-gray-900">
+      {/* @ts-expect-error client component */}
+      <Navbar />
+      <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-8">
+        <header className="mb-4">
+          <h1 className="text-2xl font-bold tracking-tight">Sobre o Projeto</h1>
+          <p className="mt-1 text-sm text-gray-600">Descrição e próximos passos</p>
+        </header>
+        {/* @ts-expect-error client component */}
+        <SobrePage />
+      </div>
+    </main>
+  );
+}
