@@ -1,4 +1,3 @@
-
 export type Questao = {
   id: string | number;
   ano: string;
