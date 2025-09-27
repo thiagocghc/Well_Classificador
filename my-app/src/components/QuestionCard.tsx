@@ -2,16 +2,24 @@
 import React from "react";
 import type { Questao } from "@/types/questao";
 import { Badge, Button } from "@/components/ui";
-import { FaCalendarAlt, FaFlagCheckered, FaFolderOpen, FaGraduationCap, FaStar } from "react-icons/fa";
-import { MdOutlineNumbers } from "react-icons/md";
+import {
+  FaCalendarAlt,
+  FaFlagCheckered,
+  FaStar,
+} from "react-icons/fa";
 
-export default function QuestionCard({ q, onOpen }: { q: Questao; onOpen: (q: Questao) => void }) {
-
-    // Definir cores para cada classe
+export default function QuestionCard({
+  q,
+  onOpen,
+}: {
+  q: Questao;
+  onOpen: (q: Questao) => void;
+}) {
+  // Definir cores para cada classe
   const getClasseColor = (classe?: string) => {
     switch ((classe || "").toLowerCase()) {
       case "ordenação":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-purple-100 text-purple-800 border-purple-200";
       case "agrupamento":
         return "bg-blue-100 text-blue-800 border-blue-200";
       default:
@@ -19,9 +27,12 @@ export default function QuestionCard({ q, onOpen }: { q: Questao; onOpen: (q: Qu
     }
   };
 
-  return (
+  // Capitalizar título (tipo "Roland Garros")
+  const capitalizeTitle = (t: string) =>
+    t.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase());
 
-     <article className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
+  return (
+    <article className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
       <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
         <span className="inline-flex items-center gap-1">
           <FaCalendarAlt /> {q.ano}
@@ -41,8 +52,9 @@ export default function QuestionCard({ q, onOpen }: { q: Questao; onOpen: (q: Qu
         </span>
       </div>
 
+      {/* aplicar capitalizeTitle aqui */}
       <h3 className="text-base font-semibold text-gray-900">
-        {q.titulo || `Questão ${q.id}`}
+        {q.titulo ? capitalizeTitle(q.titulo) : `Questão ${q.id}`}
       </h3>
 
       {q.enunciado && (
@@ -53,6 +65,5 @@ export default function QuestionCard({ q, onOpen }: { q: Questao; onOpen: (q: Qu
         <Button onClick={() => onOpen(q)}>Ver mais</Button>
       </div>
     </article>
-   
   );
 }

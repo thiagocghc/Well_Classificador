@@ -18,10 +18,9 @@ export default function FilterBar({ raw, filters, setFilters, search, setSearch 
         <Select value={filters.nivel} onChange={(v) => setFilters((s: any) => ({ ...s, nivel: v }))} options={niveis} placeholder="Nível" />
         <Select value={filters.fase} onChange={(v) => setFilters((s: any) => ({ ...s, fase: v }))} options={fases} placeholder="Fase" />
         <Select value={filters.classe} onChange={(v) => setFilters((s: any) => ({ ...s, classe: v }))} options={classes} placeholder="Classe" />
-        <Input value={search} onChange={setSearch} placeholder="Buscar por título/enunciado..." />
-        <Button variant="outline" onClick={() => setFilters({ ano: "", nivel: "", fase: "", classe: "" })}>Limpar filtros</Button>
+        <Input value={search} onChange={setSearch} placeholder="Buscar por título..." />
+        <Button  onClick={() => setFilters({ ano: "", nivel: "", fase: "", classe: "" })}>Limpar filtros</Button>
       </div>
-      <p className="mt-3 text-[11px] text-gray-500">Fonte: {PATH_CSV}</p>
     </section>
   );
 }

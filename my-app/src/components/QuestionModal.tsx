@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import type { Questao } from "@/types/questao";
-import { Badge, Button } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { FaCalendarAlt, FaStar, FaFlagCheckered } from "react-icons/fa";
 
 export default function QuestionModal({
@@ -18,7 +18,7 @@ export default function QuestionModal({
   const getClasseColor = (classe?: string) => {
     switch ((classe || "").toLowerCase()) {
       case "ordenação":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-purple-100 text-purple-800 border-purple-200";
       case "agrupamento":
         return "bg-blue-100 text-blue-800 border-blue-200";
       default:
@@ -31,12 +31,9 @@ export default function QuestionModal({
     return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
   };
 
-  // Capitalizar título (tipo "Roland Garros")
   const capitalizeTitle = (t: string) =>
     t.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase());
 
-  // Parser de alternativas a partir de UMA string (CSV), ex:
-  // "(a) 64 - (b) 65 - (c) 127 - (d) 128 - (e) nenhuma das acima"
   const parseAlternativasFromSingleString = (raw: string): { label: string; text: string }[] => {
     if (!raw) return [];
     const re = /\(([a-eA-E])\)\s*([\s\S]*?)(?=\s*\([a-eA-E]\)|$)/g;
@@ -44,9 +41,7 @@ export default function QuestionModal({
     let m: RegExpExecArray | null;
     while ((m = re.exec(raw)) !== null) {
       const k = m[1].toUpperCase();
-      const val = (m[2] || "")
-        .replace(/^\s*[-–—]\s*/, "") // remove hífen após o rótulo, se houver
-        .trim();
+      const val = (m[2] || "").replace(/^\s*[-–—]\s*/, "").trim();
       found[k] = val;
     }
     return ["A", "B", "C", "D", "E"]
@@ -54,55 +49,70 @@ export default function QuestionModal({
       .filter(Boolean) as { label: string; text: string }[];
   };
 
-  // Extrai a string de alternativas (campo único) e parseia
-  const rawAlternativas =
-    (questao as any)?.alternativas ||
-    (questao as any)?.options ||
-    (questao as any)?.alts ||
+  // campos do dataset
+  const numeroQuestao =
+    (questao as any)?.numero_questao ??
+    (questao as any)?.numero ??
+    (questao as any)?.n_questao ??
+    null;
+
+  const pergunta =
+    (questao as any)?.questao ??
+    (questao as any)?.pergunta ??
+    (questao as any)?.question ??
     "";
-  const alternativas = typeof rawAlternativas === "string"
-    ? parseAlternativasFromSingleString(rawAlternativas)
-    : Array.isArray(rawAlternativas)
+
+  const formatPergunta = (num: number | string | null, txt: string) => {
+    const n = (num !== null && String(num).trim() !== "") ? `${num}. ` : "";
+    return `${n}${txt}`.trim();
+  };
+
+  const rawAlternativas =
+    (questao as any)?.alternativas || (questao as any)?.options || (questao as any)?.alts || "";
+  const alternativas =
+    typeof rawAlternativas === "string"
+      ? parseAlternativasFromSingleString(rawAlternativas)
+      : Array.isArray(rawAlternativas)
       ? rawAlternativas.map((t: string, i: number) => ({ label: String.fromCharCode(65 + i), text: t }))
       : [];
 
   const texto = questao.textoCompleto || questao.enunciado || "(Sem texto completo)";
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/40 p-2">
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-4 sm:p-6 shadow-xl">
+    <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-2" role="dialog" aria-modal="true">
+      {/* backdrop escuro */}
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+
+      {/* painel */}
+      <div className="relative z-10 w-full max-w-2xl rounded-2xl bg-white p-4 sm:p-6 shadow-2xl">
         {/* Cabeçalho */}
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-semibold">
               {capitalizeTitle(questao.titulo || `Questão ${questao.id}`)}
             </h3>
 
-            {/* Metadados com RÓTULOS antes dos ícones */}
             <div className="mt-2 grid grid-cols-1 sm:flex gap-2 text-xs text-gray-700">
               <div className="inline-flex items-center gap-2">
-                <span className="font-semibold">Ano: </span>
+                <span className="font-semibold">Ano:</span>
                 <span className="inline-flex items-center gap-1">
                   <FaCalendarAlt /> {questao.ano ?? "—"}
                 </span>
               </div>
-
               <div className="inline-flex items-center gap-2">
-                <span className="font-semibold">Fase: </span>
+                <span className="font-semibold">Fase:</span>
                 <span className="inline-flex items-center gap-1">
                   <FaFlagCheckered /> {questao.fase ?? "—"}
                 </span>
               </div>
-
               <div className="inline-flex items-center gap-2">
-                <span className="font-semibold">Nível: </span>
+                <span className="font-semibold">Nível:</span>
                 <span className="inline-flex items-center gap-1">
                   <FaStar /> {questao.nivel ?? "—"}
                 </span>
               </div>
-
               <div className="inline-flex items-center gap-2">
-                <span className="font-semibold">Classe: </span>
+                <span className="font-semibold">Classe:</span>
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border ${getClasseColor(
                     questao.classe
@@ -129,7 +139,19 @@ export default function QuestionModal({
             </div>
           </div>
 
-          {/* Alternativas (derivadas da string única do CSV) */}
+          {/* Pergunta (com número junto) */}
+          {(pergunta || numeroQuestao !== null) && (
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Pergunta</h4>
+              <div className="rounded-xl border border-gray-200 bg-white p-3">
+                <p className="whitespace-pre-wrap leading-relaxed">
+                  {formatPergunta(numeroQuestao, pergunta)}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Alternativas */}
           {alternativas.length > 0 && (
             <div>
               <h4 className="text-sm font-semibold text-gray-900 mb-2">Alternativas</h4>
@@ -147,9 +169,7 @@ export default function QuestionModal({
 
         {/* Rodapé */}
         <div className="mt-6 flex justify-end">
-          <Button onClick={onClose}>
-            Fechar
-          </Button>
+          <Button onClick={onClose}>Fechar</Button>
         </div>
       </div>
     </div>
