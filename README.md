@@ -32,8 +32,8 @@ O projeto é educacional e open-source, com foco em **Aprendizado de Máquina** 
 
 ## Repositório do Projeto
 ```bash
-git clone https://github.com/seuusuario/well-classificador-obi.git
-cd well-classificador-obi
+git clone git@github.com:thiagocghc/Well_Classificador.git
+```
 
 ## 📂 Estrutura
 
