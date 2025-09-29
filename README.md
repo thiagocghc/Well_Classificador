@@ -1,13 +1,16 @@
 # Well: Classificador de Questões OBI
 
-Interface **web mobile-first** desenvolvida em **Next.js + Tailwind CSS** para **explorar, filtrar e classificar questões da Olimpíada Brasileira de Informática (OBI)**.  
-O projeto é educacional e open-source, com foco em **Aprendizado de Máquina** e **Ciência da Computação** aplicada à educação.
+Aplicação mobile-first desenvolvida em Next.js + Tailwind CSS para exploração, filtragem e classificação de questões da Olimpíada Brasileira de Informática (OBI).
+
+O objetivo principal é contribuir para a criação de materiais educacionais voltados ao treinamento da OBI, oferecendo suporte tanto para estudantes quanto para professores no processo de aprendizagem.
+
+Esta é uma iniciativa open-source, com foco em Problemas de Lógica, em alinhamento com a BNCC da Computação, buscando fortalecer o ensino de pensamento computacional e incentivar a presença da computação na educação básica.
 
 ---
 
 ## 🚀 Funcionalidades
 
-- Explorar questões com **filtros por Ano, Nível e Fase**.
+- Explorar questões com **filtros por Ano, Nível, Fase e Classe**.
 - Classificação automática das questões em:
   - **Ordenação** → Problemas envolvendo a ordem de objetos.
   - **Agrupamento** → Problemas envolvendo a pertença de objetos a grupos.
@@ -24,11 +27,8 @@ O projeto é educacional e open-source, com foco em **Aprendizado de Máquina** 
 - [Tailwind CSS](https://tailwindcss.com/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [OpenAI API](https://platform.openai.com/)
-- [PapaParse](https://www.papaparse.com/) (futuro parser de CSVs complexos)
 
 ---
-
-⚙️ Como rodar localmente
 
 ## Repositório do Projeto
 ```bash
