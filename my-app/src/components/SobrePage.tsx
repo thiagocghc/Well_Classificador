@@ -10,11 +10,11 @@ export default function SobrePage() {
       {/* HERO / GRID */}
       <section className="rounded-3xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Logo OBI - esquerda */}
+          {/* Logo OBI */}
           <div className="lg:col-span-3">
             <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 flex items-center justify-center">
               <Image
-                src="/lampada.svg" // troque para /obi-logo.png se tiver a logo oficial
+                src="/lampada.svg"
                 alt="Logo OBI"
                 width={220}
                 height={220}
@@ -26,24 +26,19 @@ export default function SobrePage() {
 
           {/* Texto central */}
           <div className="lg:col-span-6">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">
-              Sobre a OBI e o Projeto
-            </h1>
 
-            <p className="mt-3 text-[15px] leading-relaxed text-gray-700">
-              Este projeto oferece uma interface <b>mobile-first</b> para explorar e
-              classificar questões da Olimpíada Brasileira de Informática (OBI).
-              Na aba <b>Explorar</b>, você filtra por <i>ano</i>, <i>fase</i> e <i>nível</i>, além
-              de abrir o enunciado completo em um modal. Na aba <b>Classificar</b>,
-              você envia um enunciado e recebe a classe sugerida por um modelo,
-              integrando com a <b>API da OpenAI</b> no backend.
+           <p className="text-justify mt-3 text-[15px] leading-relaxed text-gray-700">
+                Conheça o estilo das questões da Olimpíada Brasileira de Informática (OBI) para treinar e desenvolver o Pensamento Computacional.<br></br>
+                Explore um repositório digital especializado em questões da (OBI) - Modalidade Iniciação.
+                <br></br>
+                Nossa ferramenta disponibiliza material de estudo que apoia professores e estudantes no treinamento para a competição e no desenvolvimento do raciocínio lógico e computacional.
+                Os níveis dessa modalidade são:
             </p>
 
             <ul className="mt-4 space-y-2 text-sm text-gray-700">
-              <li>• Stack: Next.js (App Router) + Tailwind CSS.</li>
-              <li>• Dados: CSVs públicos no projeto, carregados sem cache.</li>
-              <li>• Componentização: cards, filtros, modal e navbar responsivos.</li>
-              <li>• Acessibilidade: foco visível, semântica e navegação pelo teclado.</li>
+              <li>• Nível Júnior;</li>
+              <li>• Nível 1;</li>
+              <li>• Nível 2;</li> 
             </ul>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -67,6 +62,26 @@ export default function SobrePage() {
             <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
               <h3 className="text-lg font-semibold text-gray-900">Saiba mais</h3>
               <ul className="mt-3 space-y-2 text-sm">
+                                <li>
+                  <a
+                    href="https://olimpiada.ic.unicamp.br/prepare/estude/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-emerald-700 hover:underline"
+                  >
+                    Estude
+                  </a>
+                </li>
+                                <li>
+                  <a
+                    href="https://olimpiada.ic.unicamp.br/pratique/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-emerald-700 hover:underline"
+                  >
+                    Pratique 
+                  </a>
+                </li>
                 <li>
                   <a
                     href="https://olimpiada.ic.unicamp.br"
@@ -77,60 +92,28 @@ export default function SobrePage() {
                     Site oficial da OBI
                   </a>
                 </li>
+
                 <li>
                   <a
-                    href="https://olimpiada.ic.unicamp.br/pratique"
+                    href="http://wsmartins.net/jogosdelogica/"
                     target="_blank"
                     rel="noreferrer"
                     className="text-emerald-700 hover:underline"
                   >
-                    Pratique com questões antigas
+                    Divirta-se e Prepare-se
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="https://olimpiada.ic.unicamp.br/requisitos"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-emerald-700 hover:underline"
-                  >
-                    Requisitos & Regulamento
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://olimpiada.ic.unicamp.br/contato"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-emerald-700 hover:underline"
-                  >
-                    Contato / Comissão Nacional
-                  </a>
-                </li>
+               
               </ul>
 
-              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-[13px] leading-relaxed text-emerald-900">
-                Dica: no nosso app, as páginas <b>Repositório</b> e <b>Explorar</b> usam
-                datasets distintos. As questões do repositório ainda não têm classe —
-                o modal lateral foi ajustado para isso.
-              </div>
+           <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-[13px] leading-relaxed text-emerald-900">
+                No repositório do nosso app você encontra um leque de questões de edições anteriores da OBI, com a possibilidade de filtrar por <b>ano</b>, <b>fase</b> e <b>nível</b>.
+          </div>
             </div>
           </aside>
         </div>
       </section>
 
-      {/* Próximos passos */}
-      <section className="rounded-3xl border border-gray-200 bg-white p-5 sm:p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-gray-900">Próximos passos</h2>
-        <ol className="mt-3 list-decimal pl-5 text-[15px] text-gray-700 space-y-1">
-          <li>Melhorar avaliação de classe com fine-tuning ou RAG.</li>
-          <li>Paginação/infinite-scroll para grandes datasets.</li>
-          <li>Exportar resultados (CSV/JSON) e marcar favoritas.</li>
-          <li>Testes e monitoramento de qualidade do modelo.</li>
-        </ol>
-      </section>
-
-      {/* Rodapé */}
       <Footer />
     </div>
   );

@@ -8,7 +8,7 @@ export default function Page() {
       <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:py-8">
         <header className="mb-4">
           <h1 className="text-2xl font-bold tracking-tight">Sobre o Projeto</h1>
-          <p className="mt-1 text-sm text-gray-600">Descrição e próximos passos</p>
+          <p className="mt-1 text-sm text-gray-600">Well: Classificador de Questões OBI</p>
         </header>
         {/* @ts-expect-error client component */}
         <SobrePage />
