@@ -15,13 +15,11 @@ O projeto é educacional e open-source, com foco em **Aprendizado de Máquina** 
 - Modal com visual limpo para exibição de **enunciado, pergunta e alternativas**.
 - Página de **Repositório** para questões ainda não classificadas.
 - Integração com **API da OpenAI** para classificação automática.
-- Layout responsivo com **Navbar moderna** e **Footer com redes sociais**.
-
 ---
 
 ## 🛠️ Tecnologias
 
-- [Next.js 14 (App Router)](https://nextjs.org/)
+- [Next.js 15 (App Router)](https://nextjs.org/)
 - [React](https://reactjs.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [TypeScript](https://www.typescriptlang.org/)
@@ -29,6 +27,13 @@ O projeto é educacional e open-source, com foco em **Aprendizado de Máquina** 
 - [PapaParse](https://www.papaparse.com/) (futuro parser de CSVs complexos)
 
 ---
+
+⚙️ Como rodar localmente
+
+## Repositório do Projeto
+```bash
+git clone https://github.com/seuusuario/well-classificador-obi.git
+cd well-classificador-obi
 
 ## 📂 Estrutura
 
@@ -62,7 +67,10 @@ O projeto é educacional e open-source, com foco em **Aprendizado de Máquina** 
 └── README.md
 
 ## Dependências
-npm install
+NodeJS 22.20.0
+npx create-next-app@latest myapp
+npm install openai
+npm install react-icons
 
 ## ENV
 Você deve obter uma API KEY da OPENAI
