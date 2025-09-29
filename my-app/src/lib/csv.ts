@@ -1,8 +1,8 @@
 
 
-export const PATH_CSV = "/dataset/questoes.csv"; // coloque o CSV em public/dataset/questoes.csv
-export const PATH_CSV_REPOSITORIO = "/dataset/questoes_repositorio.csv"; // novo
-// Split por vírgulas que não estejam entre aspas
+export const PATH_CSV = "/dataset/questoes.csv"; 
+export const PATH_CSV_REPOSITORIO = "/dataset/questoes_repositorio.csv";
+
 const CSV_SPLIT_RE = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/;
 
 export function csvToJson<T = any>(csvText: string): T[] {

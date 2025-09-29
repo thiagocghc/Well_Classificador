@@ -1,8 +1,8 @@
 import OpenAI from "openai";
 
-export const dynamic = "force-dynamic";   // nunca gerar estático
-export const revalidate = 0;              // sem ISR
-export const fetchCache = "force-no-store"; // não cachear fetches internos
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -79,9 +79,9 @@ export async function POST(req: Request) {
 
     const messages = [
       { role: "system", content: SYSTEM_MESSAGE },
-      // NÃO alteramos o conteúdo do prompt; apenas mandamos como uma mensagem separada
+
       { role: "user", content: PROMPT_TEMPLATE },
-      // Enviamos os textos reais em outra mensagem para garantir que o modelo receba TUDO
+
       {
         role: "user",
         content: `Enunciado:\n${enunciado}\n\nQuestão:\n${questao || "(sem pergunta)"}`,
@@ -96,8 +96,8 @@ export async function POST(req: Request) {
 
     const content = completion.choices[0]?.message?.content ?? "{}";
 
-    // LOG da resposta da API (servidor)
-    console.log("[classificar] RAW content:", content);
+    // LOG
+    console.log("[classificar] feedback API:", content);
 
     let data: any = {};
     try {
@@ -106,13 +106,12 @@ export async function POST(req: Request) {
       data = {};
     }
 
-    // Normaliza classe
     let classeRaw = String(data.classe ?? data.classificacao ?? "outros").toLowerCase();
     if (classeRaw === "ordenacao" || classeRaw === "ordenação") classeRaw = "ordenação";
     else if (classeRaw === "agrupamento") classeRaw = "agrupamento";
     else classeRaw = "outros";
 
-    // LOG pós-normalização
+    // LOG
     console.log("[classificar] classe normalizada:", classeRaw);
 
     return new Response(JSON.stringify({ classe: classeRaw }), {

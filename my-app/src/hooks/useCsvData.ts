@@ -41,12 +41,12 @@ function useCsvDataPath(path: string): HookResult {
   return { data, loaded, error };
 }
 
-/** Dataset de questões já classificadas (página principal) */
+/** Dataset de questões já classificadas */
 export function useCsvData(): HookResult {
   return useCsvDataPath(PATH_CSV);
 }
 
-/** Dataset do repositório (questões ainda não classificadas) */
+/** Dataset do repositório */
 export function useCsvDataRepo(): HookResult {
   return useCsvDataPath(PATH_CSV_REPOSITORIO);
 }

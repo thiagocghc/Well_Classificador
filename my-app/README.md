@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Well: Classificador de Questões OBI
 
-## Getting Started
+Interface **web mobile-first** desenvolvida em **Next.js + Tailwind CSS** para **explorar, filtrar e classificar questões da Olimpíada Brasileira de Informática (OBI)**.  
+O projeto é educacional e open-source, com foco em **Aprendizado de Máquina** e **Ciência da Computação** aplicada à educação.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Funcionalidades
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Explorar questões com **filtros por Ano, Nível e Fase**.
+- Classificação automática das questões em:
+  - **Ordenação** → Problemas envolvendo a ordem de objetos.
+  - **Agrupamento** → Problemas envolvendo a pertença de objetos a grupos.
+  - **Outros** → Problemas que envolvem cálculos, representações gráficas etc.
+- Modal com visual limpo para exibição de **enunciado, pergunta e alternativas**.
+- Página de **Repositório** para questões ainda não classificadas.
+- Integração com **API da OpenAI** para classificação automática.
+- Layout responsivo com **Navbar moderna** e **Footer com redes sociais**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Tecnologias
 
-## Learn More
+- [Next.js 14 (App Router)](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [OpenAI API](https://platform.openai.com/)
+- [PapaParse](https://www.papaparse.com/) (futuro parser de CSVs complexos)
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📂 Estrutura
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+├── /app
+│ ├── /classificar → Página para classificar novas questões
+│ ├── /repositorio → Página do repositório (questões sem classe)
+│ ├── /sobre → Página sobre o projeto
+│ └── /api/classificar → Endpoint para integração com OpenAI
+│
+├── /components
+│ ├── Navbar.tsx
+│ ├── Footer.tsx
+│ ├── FilterBar.tsx
+│ ├── QuestionCard.tsx
+│ ├── QuestionModal.tsx
+│ └── QuestionModalRepo.tsx
+│
+├── /hooks
+│ ├── useCsvData.ts
+│ └── useCsvDataRepo.ts
+│
+├── /public
+│ ├── logo.png
+│ ├── dataset.csv
+│ └── dataset_repositorio.csv
+│
+├── /lib
+│ └── csv.ts → Funções utilitárias para CSV
+│
+├── package.json
+└── README.md
 
-## Deploy on Vercel
+## Dependências
+npm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ENV
+Você deve obter uma API KEY da OPENAI
+OPENAI_API_KEY="sua_chave"
+OPENAI_MODEL=gpt-5-mini
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Contato
+Autor: Thiago Almeida
+GitHub: @thiagocghc
+WhatsApp: 67 98402-6511

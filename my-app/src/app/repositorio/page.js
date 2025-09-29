@@ -5,7 +5,7 @@ import RepositorioPage from "@/components/RepositorioPage";
 export default function Page() {
   return (
     <main className="min-h-dvh bg-gradient-to-b from-gray-50 to-white text-gray-900">
-      {/* Navbar fixa no topo */}
+
       {/* @ts-expect-error client component */}
 
       <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:py-8">
