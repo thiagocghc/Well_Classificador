@@ -36,7 +36,7 @@ git clone git@github.com:thiagocghc/Well_Classificador.git
 ```
 
 ## 📂 Estrutura
-
+<pre lang="markdown"> ```
 ├── /app
 │ ├── /classificar → Página para classificar novas questões
 │ ├── /repositorio → Página do repositório (questões sem classe)
@@ -65,6 +65,8 @@ git clone git@github.com:thiagocghc/Well_Classificador.git
 │
 ├── package.json
 └── README.md
+
+``` </pre>
 
 ## Dependências
 NodeJS 22.20.0
