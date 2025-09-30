@@ -42,7 +42,7 @@ export default function ClassificarPage() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  const handleClassificar = async () => {
+  const classificarQuestao = async () => {
     setErro(null);
     setResultado(null);
     const enunciado = texto.trim();
@@ -52,10 +52,10 @@ export default function ClassificarPage() {
       setLoading(true);
       const res = await fetch(`/api/classificar?t=${Date.now()}`, {
         method: "POST",
-        cache: "no-store", // Next/React: não usar cache
+        cache: "no-store", 
         headers: {
               "Content-Type": "application/json",
-              "Cache-Control": "no-store", // Browser
+              "Cache-Control": "no-store",
          },
         body: JSON.stringify({ enunciado, questao: "" }),
       });
@@ -64,7 +64,7 @@ export default function ClassificarPage() {
       if (!res.ok) throw new Error(data?.error || "Falha ao classificar");
       setResultado({ classe: normalizaClasse(data.classe) });
     } catch (e: any) {
-      setErro(e.message || "Erro inesperado");
+      setErro(e.message || "Erro ao classificar");
     } finally {
       setLoading(false);
     }
@@ -88,19 +88,19 @@ export default function ClassificarPage() {
         <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           <h2 className="text-lg font-semibold">Classificar uma Nova Questão</h2>
           <p className="mt-1 text-sm text-gray-600">
-            Cole o enunciado abaixo e clique em <b>Classificar</b>.
+            Cole o texto abaixo e clique em <b>Classificar</b>.
           </p>
 
           <textarea
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             rows={8}
-            placeholder="Cole aqui o enunciado da questão..."
+            placeholder="Cole aqui o texto da questão..."
             className="mt-3 w-full resize-y rounded-xl border border-gray-200 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-gray-300"
           />
 
           <div className="mt-3 flex items-center gap-2">
-            <Button onClick={handleClassificar}>
+            <Button onClick={classificarQuestao}>
               {loading ? (
                 <span className="inline-flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -155,7 +155,7 @@ export default function ClassificarPage() {
 
           {!loading && !resultado && !erro && (
             <p className="text-sm text-gray-500">
-              Aguardando classificação… cole o enunciado e clique em <b>Classificar</b>.
+              Aguardando classificação… cole o texto e clique em <b>Classificar</b>.
             </p>
           )}
         </section>

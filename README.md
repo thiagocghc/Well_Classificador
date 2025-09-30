@@ -17,7 +17,7 @@ Esta é uma iniciativa open-source, com foco em Problemas de Lógica, em alinham
   - **Outros** → Problemas que envolvem cálculos, representações gráficas etc.
 - Modal com visual limpo para exibição de **enunciado, pergunta e alternativas**.
 - Página de **Repositório** para questões ainda não classificadas.
-- Integração com **API da OpenAI** para classificação automática.
+- Integração com **API da OpenAI** para classificação automática com chain of thought prompting.
 ---
 
 ## 🛠️ Tecnologias
