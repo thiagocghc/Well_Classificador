@@ -100,7 +100,7 @@ export default function ClassificarPage() {
           />
 
           <div className="mt-3 flex items-center gap-2">
-            <Button onClick={handleClassificar} disabled={loading}>
+            <Button onClick={handleClassificar}>
               {loading ? (
                 <span className="inline-flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -118,7 +118,6 @@ export default function ClassificarPage() {
                 setResultado(null);
                 setErro(null);
               }}
-              className="border border-blue-500 text-blue-600 hover:bg-blue-50"
             >
               Limpar
             </Button>
