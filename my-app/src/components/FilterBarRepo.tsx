@@ -94,7 +94,7 @@ export default function FilterBarRepo({
       <div className="flex flex-col gap-4">
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Ano</div>
-          <div className="w-4/5">
+          <div className="w-full">
             <Select
               value={filters.ano}
               onChange={(v) => setFilters((s: RepoFilters) => ({ ...s, ano: v }))}
@@ -106,7 +106,7 @@ export default function FilterBarRepo({
 
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Fase</div>
-          <div className="w-4/5">
+          <div className="w-full">
             <Select
               value={filters.fase}
               onChange={(v) => setFilters((s: RepoFilters) => ({ ...s, fase: v }))}
@@ -118,7 +118,7 @@ export default function FilterBarRepo({
 
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Nível</div>
-          <div className="w-4/5">
+          <div className="w-full">
             <Select
               value={filters.nivel}
               onChange={(v) => setFilters((s: RepoFilters) => ({ ...s, nivel: v }))}
@@ -131,7 +131,7 @@ export default function FilterBarRepo({
         {/* Buscar por título (apenas título, sem enunciado) */}
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Buscar por título</div>
-          <div className="w-4/5 flex items-center gap-2">
+          <div className="w-full flex items-center gap-2">
             <FaSearch className="text-gray-400 text-sm" />
             <Input
               value={search}
