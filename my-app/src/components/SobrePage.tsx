@@ -28,18 +28,24 @@ export default function SobrePage() {
           <div className="lg:col-span-6">
 
            <p className="text-justify mt-3 text-[15px] leading-relaxed text-gray-700">
-                Conheça o estilo das questões da Olimpíada Brasileira de Informática (OBI) para treinar e desenvolver o Pensamento Computacional.<br></br>
-                Explore um repositório digital especializado em questões da (OBI) - Modalidade Iniciação.
-                <br></br>
-                Nossa ferramenta disponibiliza material de estudo que apoia professores e estudantes no treinamento para a competição e no desenvolvimento do raciocínio lógico e computacional.
-                Os níveis dessa modalidade são:
+              A Olimpíada Brasileira de Informática (OBI) é uma competição que desafia os estudantes a pensar de forma lógica e criativa.
+              Conheça o estilo e a estrutura das questões para treinar e desenvolver o Pensamento Computacional.
             </p>
 
-            <ul className="mt-4 space-y-2 text-sm text-gray-700">
-              <li>• Nível Júnior;</li>
-              <li>• Nível 1;</li>
-              <li>• Nível 2;</li> 
-            </ul>
+            <p className="text-justify mt-3 text-[15px] leading-relaxed text-gray-700">
+
+              Nosso App disponibiliza um sistema de classificação automática de questões, explorando técnicas de Inteligência Artificial para organizar e apoiar o processo pedagógico.
+              Além de um repositório digital especializado em questões da OBI, reunindo materiais de estudo para a competição. 
+                
+            </p>
+
+              <p className="text-justify mt-3 text-[15px] leading-relaxed text-gray-700">
+                  A proposta é oferecer a professores e estudantes um acervo acessível para treinamento, permitindo a criação de trilhas de aprendizado, simulados e atividades alinhadas aos desafios da competição. 
+              </p>
+
+            <p className="text-justify mt-3 text-[15px] leading-relaxed text-gray-700">
+                Este é um projeto open-source, feito para ajudar de verdade quem estuda ou ensina. A ideia é disponibilizar um espaço onde você pode treinar para a OBI e, ao mesmo tempo, explorar problemas de lógica de um jeito simples e acessível.
+            </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
               <Link
