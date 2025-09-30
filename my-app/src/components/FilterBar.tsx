@@ -20,7 +20,7 @@ export default function FilterBar({
   search: string;
   setSearch: (v: string) => void;
 }) {
-  // arrays únicos (como string[])
+  // arrays únicos
   const anos = useMemo(
     () => Array.from(new Set(raw.map((q) => String(q.ano || "")))).filter(Boolean).sort(),
     [raw]
@@ -51,13 +51,10 @@ export default function FilterBar({
   const clearOne = (k: keyof Filters) => setFilters((s: Filters) => ({ ...s, [k]: "" }));
 
   const fieldWrap = "space-y-1";
-  const selectBase =
-    "rounded-xl border bg-white text-sm outline-none transition focus:ring-2 focus:ring-blue-200";
-  const selectedRing = "border-blue-500 ring-2 ring-blue-200";
 
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
-      {/* header + limpar tudo (só quando há filtros) */}
+      {/* header + limpar tudo */}
       <div className="mb-2 flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold">Filtros</h3>
         {hasActive && (
@@ -99,68 +96,68 @@ export default function FilterBar({
         </div>
       )}
 
-      {/* LABEL + SELECT + INPUT (options como string[]) */}
-     <div className="flex flex-col gap-4">
-  <div className={fieldWrap}>
-    <label htmlFor="f-ano" className="text-xs font-medium text-gray-700">Ano</label>
-    <Select
-      id="f-ano"
-      value={filters.ano}
-      onChange={(v) => setFilters((s: Filters) => ({ ...s, ano: v }))}
-      options={anos}
-      placeholder="Todos"
-      className={`${selectBase} w-4/5 ${filters.ano ? selectedRing : "border-gray-200"}`}
-    />
-  </div>
+      {/* Campos */}
+      <div className="flex flex-col gap-4">
+        <div className={fieldWrap}>
+          <div className="text-xs font-medium text-gray-700">Ano</div>
+          <div className="w-full">
+            <Select
+              value={filters.ano}
+              onChange={(v) => setFilters((s: Filters) => ({ ...s, ano: v }))}
+              options={anos}
+              placeholder="Todos"
+            />
+          </div>
+        </div>
 
-  <div className={fieldWrap}>
-    <label htmlFor="f-fase" className="text-xs font-medium text-gray-700">Fase</label>
-    <Select
-      id="f-fase"
-      value={filters.fase}
-      onChange={(v) => setFilters((s: Filters) => ({ ...s, fase: v }))}
-      options={fases}
-      placeholder="Todos"
-      className={`${selectBase} w-4/5 ${filters.fase ? selectedRing : "border-gray-200"}`}
-    />
-  </div>
+        <div className={fieldWrap}>
+          <div className="text-xs font-medium text-gray-700">Fase</div>
+          <div className="w-full">
+            <Select
+              value={filters.fase}
+              onChange={(v) => setFilters((s: Filters) => ({ ...s, fase: v }))}
+              options={fases}
+              placeholder="Todos"
+            />
+          </div>
+        </div>
 
-  <div className={fieldWrap}>
-    <label htmlFor="f-nivel" className="text-xs font-medium text-gray-700">Nível</label>
-    <Select
-      id="f-nivel"
-      value={filters.nivel}
-      onChange={(v) => setFilters((s: Filters) => ({ ...s, nivel: v }))}
-      options={niveis}
-      placeholder="Todos"
-      className={`${selectBase} w-4/5 ${filters.nivel ? selectedRing : "border-gray-200"}`}
-    />
-  </div>
+        <div className={fieldWrap}>
+          <div className="text-xs font-medium text-gray-700">Nível</div>
+          <div className="w-full">
+            <Select
+              value={filters.nivel}
+              onChange={(v) => setFilters((s: Filters) => ({ ...s, nivel: v }))}
+              options={niveis}
+              placeholder="Todos"
+            />
+          </div>
+        </div>
 
-  <div className={fieldWrap}>
-    <label htmlFor="f-classe" className="text-xs font-medium text-gray-700">Classe</label>
-    <Select
-      id="f-classe"
-      value={filters.classe}
-      onChange={(v) => setFilters((s: Filters) => ({ ...s, classe: v }))}
-      options={classes}
-      placeholder="Todos"
-      className={`${selectBase} w-4/5 ${filters.classe ? selectedRing : "border-gray-200"}`}
-    />
-  </div>
+        <div className={fieldWrap}>
+          <div className="text-xs font-medium text-gray-700">Classe</div>
+          <div className="w-full">
+            <Select
+              value={filters.classe}
+              onChange={(v) => setFilters((s: Filters) => ({ ...s, classe: v }))}
+              options={classes}
+              placeholder="Todos"
+            />
+          </div>
+        </div>
 
-  <div className={fieldWrap}>
-    <label htmlFor="f-busca" className="text-xs font-medium text-gray-700">Buscar por título</label>
-    <Input
-      id="f-busca"
-      value={search}
-      onChange={setSearch}
-      placeholder="Ex.: biblioteca"
-      className="w-4/5 rounded-xl border border-gray-200 bg-white text-sm"
-    />
-  </div>
-</div>
-
+        <div className={fieldWrap}>
+          <div className="text-xs font-medium text-gray-700">Buscar por título</div>
+          <div className="w-full flex items-center gap-2">
+            <FaSearch className="text-gray-400 text-sm" />
+            <Input
+              value={search}
+              onChange={setSearch}
+              placeholder="Ex.: biblioteca"
+            />
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
