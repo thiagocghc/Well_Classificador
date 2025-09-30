@@ -5,9 +5,9 @@ import { Input, Select } from "@/components/ui";
 import { FaFilter, FaSearch } from "react-icons/fa";
 import { FiX } from "react-icons/fi";
 
-type Filters = { ano: string; nivel: string; fase: string; classe: string };
+export type RepoFilters = { ano: string; nivel: string; fase: string };
 
-export default function FilterBar({
+export default function FilterBarRepo({
   raw,
   filters,
   setFilters,
@@ -15,12 +15,12 @@ export default function FilterBar({
   setSearch,
 }: {
   raw: Questao[];
-  filters: Filters;
+  filters: RepoFilters;
   setFilters: (p: any) => void;
   search: string;
   setSearch: (v: string) => void;
 }) {
-  // arrays únicos
+  // arrays únicos (apenas campos disponíveis no repositório)
   const anos = useMemo(
     () => Array.from(new Set(raw.map((q) => String(q.ano || "")))).filter(Boolean).sort(),
     [raw]
@@ -33,28 +33,22 @@ export default function FilterBar({
     () => Array.from(new Set(raw.map((q) => String(q.fase || "")))).filter(Boolean).sort(),
     [raw]
   );
-  const classes = useMemo(
-    () => Array.from(new Set(raw.map((q) => String(q.classe || "")))).filter(Boolean).sort(),
-    [raw]
-  );
 
-  const hasActive = !!(filters.ano || filters.nivel || filters.fase || filters.classe);
-
-  const labelMap: Record<keyof Filters, string> = {
+  const hasActive = !!(filters.ano || filters.nivel || filters.fase);
+  const labelMap: Record<keyof RepoFilters, string> = {
     ano: "Ano",
     fase: "Fase",
     nivel: "Nível",
-    classe: "Classe",
   };
 
-  const clearAll = () => setFilters({ ano: "", nivel: "", fase: "", classe: "" });
-  const clearOne = (k: keyof Filters) => setFilters((s: Filters) => ({ ...s, [k]: "" }));
+  const clearAll = () => setFilters({ ano: "", nivel: "", fase: "" });
+  const clearOne = (k: keyof RepoFilters) => setFilters((s: RepoFilters) => ({ ...s, [k]: "" }));
 
   const fieldWrap = "space-y-1";
 
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
-      {/* header + limpar tudo */}
+      {/* header + limpar tudo (só quando há filtros) */}
       <div className="mb-2 flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold">Filtros</h3>
         {hasActive && (
@@ -73,7 +67,7 @@ export default function FilterBar({
       {/* pills individuais */}
       {hasActive && (
         <div className="mb-3 flex flex-wrap gap-2">
-          {(Object.keys(filters) as (keyof Filters)[])
+          {(Object.keys(filters) as (keyof RepoFilters)[])
             .filter((k) => filters[k])
             .map((k) => (
               <span
@@ -96,14 +90,14 @@ export default function FilterBar({
         </div>
       )}
 
-      {/* Campos */}
+      {/* Campos (um por linha; Select com 80% via wrapper) */}
       <div className="flex flex-col gap-4">
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Ano</div>
-          <div className="w-full">
+          <div className="w-4/5">
             <Select
               value={filters.ano}
-              onChange={(v) => setFilters((s: Filters) => ({ ...s, ano: v }))}
+              onChange={(v) => setFilters((s: RepoFilters) => ({ ...s, ano: v }))}
               options={anos}
               placeholder="Todos"
             />
@@ -112,10 +106,10 @@ export default function FilterBar({
 
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Fase</div>
-          <div className="w-full">
+          <div className="w-4/5">
             <Select
               value={filters.fase}
-              onChange={(v) => setFilters((s: Filters) => ({ ...s, fase: v }))}
+              onChange={(v) => setFilters((s: RepoFilters) => ({ ...s, fase: v }))}
               options={fases}
               placeholder="Todos"
             />
@@ -124,19 +118,20 @@ export default function FilterBar({
 
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Nível</div>
-          <div className="w-full">
+          <div className="w-4/5">
             <Select
               value={filters.nivel}
-              onChange={(v) => setFilters((s: Filters) => ({ ...s, nivel: v }))}
+              onChange={(v) => setFilters((s: RepoFilters) => ({ ...s, nivel: v }))}
               options={niveis}
               placeholder="Todos"
             />
           </div>
         </div>
 
+        {/* Buscar por título (apenas título, sem enunciado) */}
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Buscar por título</div>
-          <div className="w-full flex items-center gap-2">
+          <div className="w-4/5 flex items-center gap-2">
             <FaSearch className="text-gray-400 text-sm" />
             <Input
               value={search}

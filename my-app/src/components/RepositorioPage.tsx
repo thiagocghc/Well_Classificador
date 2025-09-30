@@ -1,16 +1,19 @@
-// app/repositorio/page.tsx  (ou pages/repositorio.tsx se estiver no Pages Router)
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 import type { Questao } from "@/types/questao";
 import { useCsvDataRepo } from "@/hooks/useCsvData";
-import { PATH_CSV_REPOSITORIO } from "@/lib/csv";
-import FilterBarRepo from "@/components/FilterBarRepo";
+import FilterBarRepo, { RepoFilters } from "@/components/FilterBarRepo";
 import QuestionCardRepo from "@/components/QuestionCardRepo";
-import QuestionModalRepo from "./QuestionModalRepo";
+import QuestionModalRepo from "@/components/QuestionModalRepo";
 
 export default function RepositorioPage() {
   const { data: raw, loaded, error } = useCsvDataRepo();
-  const [filters, setFilters] = useState({ ano: "", nivel: "", fase: "" });
+
+  const [filters, setFilters] = useState<RepoFilters>({
+    ano: "",
+    nivel: "",
+    fase: "",
+  });
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<Questao | null>(null);
@@ -21,14 +24,12 @@ export default function RepositorioPage() {
   }, [raw.length]);
 
   const filtered = useMemo(() => {
+    const needle = search.toLowerCase().trim();
     return raw
       .filter((q) => (filters.ano ? q.ano === filters.ano : true))
       .filter((q) => (filters.nivel ? q.nivel === filters.nivel : true))
       .filter((q) => (filters.fase ? q.fase === filters.fase : true))
-      .filter((q) => {
-        const hay = `${q.titulo || ""} ${q.enunciado || ""}`.toLowerCase();
-        return hay.includes(search.toLowerCase());
-      });
+      .filter((q) => (needle ? String(q.titulo || "").toLowerCase().includes(needle) : true));
   }, [raw, filters, search]);
 
   return (
@@ -58,13 +59,14 @@ export default function RepositorioPage() {
               <QuestionCardRepo
                 key={q.id}
                 q={q}
-                showClasse={false}        // <— sem badge/ícone de classe
+                showClasse={false} // repositório não tem classe
                 onOpen={(qq) => {
                   setActive(qq);
                   setOpen(true);
                 }}
               />
             ))}
+
             {loaded && filtered.length === 0 && (
               <div className="col-span-full rounded-2xl border border-dashed border-gray-300 p-6 text-center text-sm text-gray-600">
                 Nenhuma questão encontrada com os filtros atuais.
