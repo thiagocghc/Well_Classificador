@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -77,7 +78,7 @@ export async function POST(req: Request) {
     console.log("[classificar] ENUNCIADO length:", enunciado.length);
     console.log("[classificar] QUESTAO length:", questao.length);
 
-    const messages = [
+    const messages: ChatCompletionMessageParam[]  = [
       { role: "system", content: SYSTEM_MESSAGE },
 
       { role: "user", content: PROMPT_TEMPLATE },
@@ -86,7 +87,7 @@ export async function POST(req: Request) {
         role: "user",
         content: `Enunciado:\n${enunciado}\n\nQuestão:\n${questao || "(sem pergunta)"}`,
       },
-    ] as const;
+    ];
 
     const completion = await client.chat.completions.create({
       model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
@@ -121,6 +122,8 @@ export async function POST(req: Request) {
             "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
             "Pragma": "no-cache",
             "Expires": "0",
+            "CDN-Cache-Control": "no-store",
+            "Vercel-CDN-Cache-Control": "no-store",
       },
     });
   } catch (err) {
