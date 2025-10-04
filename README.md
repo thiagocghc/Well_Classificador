@@ -38,30 +38,34 @@ git clone git@github.com:thiagocghc/Well_Classificador.git
 ## 📂 Estrutura
 <pre lang="markdown"> ```
 ├── /app
-│ ├── /classificar → Página para classificar novas questões
-│ ├── /repositorio → Página do repositório (questões sem classe)
-│ ├── /sobre → Página sobre o projeto
-│ └── /api/classificar → Endpoint para integração com OpenAI
+│   ├── /classificar       → Página para classificar novas questões
+│   ├── /repositorio       → Página do repositório (questões sem classe)
+│   ├── /sobre             → Página sobre o projeto
+│   └── /api/classificar   → Endpoint para integração com OpenAI
 │
 ├── /components
-│ ├── Navbar.tsx
-│ ├── Footer.tsx
-│ ├── FilterBar.tsx
-│ ├── QuestionCard.tsx
-│ ├── QuestionModal.tsx
-│ └── QuestionModalRepo.tsx
+│   ├── Navbar.tsx
+│   ├── Footer.tsx
+│   ├── HomePage.tsx       → Página inicial
+│   ├── SobrePage.tsx      → Página "Sobre"
+│   ├── RepositorioPage.tsx→ Página do repositório
+│   ├── FilterBar.tsx
+│   ├── QuestionCard.tsx
+│   ├── QuestionModal.tsx
+│   ├── QuestionModalRepo.tsx
+│   └── ui.tsx             → Componentes reutilizáveis (botões, selects, inputs, etc.)
 │
 ├── /hooks
-│ ├── useCsvData.ts
-│ └── useCsvDataRepo.ts
+│   ├── useCsvData.ts
+│   └── useCsvDataRepo.ts
 │
 ├── /public
-│ ├── logo.png
-│ ├── dataset.csv
-│ └── dataset_repositorio.csv
+│   ├── logo.png
+│   ├── dataset.csv
+│   └── dataset_repositorio.csv
 │
 ├── /lib
-│ └── csv.ts → Funções utilitárias para CSV
+│   └── csv.ts             → Funções utilitárias para CSV
 │
 ├── package.json
 └── README.md
