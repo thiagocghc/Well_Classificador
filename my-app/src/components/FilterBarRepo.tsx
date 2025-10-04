@@ -7,6 +7,9 @@ import { FiX } from "react-icons/fi";
 
 export type RepoFilters = { ano: string; nivel: string; fase: string };
 
+const labelNivel = (n: string) => (n === "0" ? "Nível Júnior" : `Nível ${n}`);
+const labelFase = (n: string) => `Fase ${n}`;
+
 export default function FilterBarRepo({
   raw,
   filters,
@@ -20,35 +23,51 @@ export default function FilterBarRepo({
   search: string;
   setSearch: (v: string) => void;
 }) {
-  // arrays únicos (apenas campos disponíveis no repositório)
+  // valores brutos únicos
   const anos = useMemo(
-    () => Array.from(new Set(raw.map((q) => String(q.ano || "")))).filter(Boolean).sort(),
+    () => Array.from(new Set(raw.map((q) => String(q.ano ?? "")))).filter(Boolean).sort(),
     [raw]
   );
-  const niveis = useMemo(
-    () => Array.from(new Set(raw.map((q) => String(q.nivel || "")))).filter(Boolean).sort(),
+  const niveisRaw = useMemo(
+    () => Array.from(new Set(raw.map((q) => String(q.nivel ?? "")))).filter(Boolean).sort(),
     [raw]
   );
-  const fases = useMemo(
-    () => Array.from(new Set(raw.map((q) => String(q.fase || "")))).filter(Boolean).sort(),
+  const fasesRaw = useMemo(
+    () => Array.from(new Set(raw.map((q) => String(q.fase ?? "")))).filter(Boolean).sort(),
     [raw]
   );
 
+  // rótulos que o Select vai exibir (são strings!)
+  const niveisLabels = useMemo(() => niveisRaw.map(labelNivel), [niveisRaw]);
+  const fasesLabels = useMemo(() => fasesRaw.map(labelFase), [fasesRaw]);
+
+  // mapas de ida/volta (label <-> valor)
+  const nivelLabelToValue = useMemo(() => {
+    const m = new Map<string, string>();
+    niveisRaw.forEach((n) => m.set(labelNivel(n), n));
+    return m;
+  }, [niveisRaw]);
+
+  const faseLabelToValue = useMemo(() => {
+    const m = new Map<string, string>();
+    fasesRaw.forEach((n) => m.set(labelFase(n), n));
+    return m;
+  }, [fasesRaw]);
+
   const hasActive = !!(filters.ano || filters.nivel || filters.fase);
-  const labelMap: Record<keyof RepoFilters, string> = {
-    ano: "Ano",
-    fase: "Fase",
-    nivel: "Nível",
-  };
+  const labelMap: Record<keyof RepoFilters, string> = { ano: "Ano", fase: "Fase", nivel: "Nível" };
 
   const clearAll = () => setFilters({ ano: "", nivel: "", fase: "" });
   const clearOne = (k: keyof RepoFilters) => setFilters((s: RepoFilters) => ({ ...s, [k]: "" }));
 
   const fieldWrap = "space-y-1";
 
+  const nivelDisplay = filters.nivel ? labelNivel(filters.nivel) : "";
+  const faseDisplay = filters.fase ? labelFase(filters.fase) : "";
+
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
-      {/* header + limpar tudo (só quando há filtros) */}
+      {/* header + limpar tudo */}
       <div className="mb-2 flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold">Filtros</h3>
         {hasActive && (
@@ -64,34 +83,41 @@ export default function FilterBarRepo({
         )}
       </div>
 
-      {/* pills individuais */}
+      {/* pills com labels amigáveis */}
       {hasActive && (
         <div className="mb-3 flex flex-wrap gap-2">
           {(Object.keys(filters) as (keyof RepoFilters)[])
             .filter((k) => filters[k])
-            .map((k) => (
-              <span
-                key={k}
-                className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs"
-              >
-                <FaFilter className="text-gray-500" />
-                <span className="font-medium">{labelMap[k]}:</span>
-                <span className="text-gray-700">{String(filters[k])}</span>
-                <button
-                  onClick={() => clearOne(k)}
-                  className="ml-1 rounded-full p-0.5 hover:bg-gray-200"
-                  aria-label={`Remover filtro ${labelMap[k]}`}
-                  title={`Remover filtro ${labelMap[k]}`}
+            .map((k) => {
+              const rawVal = String(filters[k]);
+              const shown =
+                k === "nivel" ? labelNivel(rawVal) : k === "fase" ? labelFase(rawVal) : rawVal;
+
+              return (
+                <span
+                  key={k}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs"
                 >
-                  <FiX />
-                </button>
-              </span>
-            ))}
+                  <FaFilter className="text-gray-500" />
+                  <span className="font-medium">{labelMap[k]}:</span>
+                  <span className="text-gray-700">{shown}</span>
+                  <button
+                    onClick={() => clearOne(k)}
+                    className="ml-1 rounded-full p-0.5 hover:bg-gray-200"
+                    aria-label={`Remover filtro ${labelMap[k]}`}
+                    title={`Remover filtro ${labelMap[k]}`}
+                  >
+                    <FiX />
+                  </button>
+                </span>
+              );
+            })}
         </div>
       )}
 
-      {/* Campos (um por linha; Select com 80% via wrapper) */}
+      {/* campos */}
       <div className="flex flex-col gap-4">
+        {/* Ano */}
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Ano</div>
           <div className="w-full">
@@ -104,40 +130,45 @@ export default function FilterBarRepo({
           </div>
         </div>
 
+        {/* Fase */}
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Fase</div>
           <div className="w-full">
             <Select
-              value={filters.fase}
-              onChange={(v) => setFilters((s: RepoFilters) => ({ ...s, fase: v }))}
-              options={fases}
-              placeholder="Todos"
+              value={faseDisplay}
+              onChange={(label) =>
+                setFilters((s: RepoFilters) => ({ ...s, fase: faseLabelToValue.get(label) ?? "" }))
+              }
+              options={fasesLabels}
+              placeholder="Todas"
             />
           </div>
         </div>
 
+        {/* Nível */}
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Nível</div>
           <div className="w-full">
             <Select
-              value={filters.nivel}
-              onChange={(v) => setFilters((s: RepoFilters) => ({ ...s, nivel: v }))}
-              options={niveis}
+              value={nivelDisplay}
+              onChange={(label) =>
+                setFilters((s: RepoFilters) => ({
+                  ...s,
+                  nivel: nivelLabelToValue.get(label) ?? "",
+                }))
+              }
+              options={niveisLabels}
               placeholder="Todos"
             />
           </div>
         </div>
 
-        {/* Buscar por título (apenas título, sem enunciado) */}
+        {/* Buscar por título */}
         <div className={fieldWrap}>
           <div className="text-xs font-medium text-gray-700">Buscar por título</div>
           <div className="w-full flex items-center gap-2">
             <FaSearch className="text-gray-400 text-sm" />
-            <Input
-              value={search}
-              onChange={setSearch}
-              placeholder="Ex.: biblioteca"
-            />
+            <Input value={search} onChange={setSearch} placeholder="Ex.: biblioteca" />
           </div>
         </div>
       </div>

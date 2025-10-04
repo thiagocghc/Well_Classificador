@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { Button } from "@/components/ui";
-import { FaSortAmountDown, FaObjectGroup, FaQuestionCircle } from "react-icons/fa";
+import { FaSortAmountDown, FaObjectGroup, FaQuestionCircle, FaCheckCircle, FaPuzzlePiece } from "react-icons/fa";
 
 type Resultado = { classe: "ordenação" | "agrupamento" | "outros" | string };
 
@@ -16,24 +16,59 @@ const estiloDaClasse = (c: string) => {
   const classe = normalizaClasse(c);
   if (classe === "ordenação")
     return {
-      wrap: "p-10 bg-purple-100 text-purple-800 border-purple-200",
+      key: "ordenação" as const,
+      bg: "bg-purple-100",
+      text: "text-purple-800",
+      border: "border-purple-200",
+      iconBg: "bg-purple-500/10",
+      iconRing: "ring-purple-400/40",
       icon: <FaSortAmountDown />,
       label: "Ordenação",
       desc: "Problemas envolvendo a ordem de objetos.",
     };
   if (classe === "agrupamento")
     return {
-      wrap: "p-10 bg-blue-100 text-blue-800 border-blue-200",
+      key: "agrupamento" as const,
+      bg: "bg-blue-100",
+      text: "text-blue-800",
+      border: "border-blue-200",
+      iconBg: "bg-blue-500/10",
+      iconRing: "ring-blue-400/40",
       icon: <FaObjectGroup />,
       label: "Agrupamento",
       desc: "Problemas envolvendo a pertinência de objetos a grupos.",
     };
   return {
-    wrap: "p-10 bg-yellow-100 text-yellow-800 border-yellow-200",
-    icon: <FaQuestionCircle />,
+    key: "outros" as const,
+    bg: "bg-yellow-100",
+    text: "text-yellow-800",
+    border: "border-yellow-200",
+    iconBg: "bg-yellow-500/10",
+    iconRing: "ring-yellow-400/40",
+    icon: <FaPuzzlePiece />,
     label: "Outros",
-    desc: "Problemas que envolvem cálculos, definições, etc.",
+    desc: "Problemas que envolvendo números, cálculos ou estruturas.",
   };
+};
+
+const featuresDaClasse = (c: string): string[] => {
+  const classe = normalizaClasse(c);
+  if (classe === "ordenação") {
+    return [
+      "Associa um objeto a uma lista de posições específicas",
+      "Envolve restrições de ordem ou vizinhança",
+    ];
+  }
+  if (classe === "agrupamento") {
+    return [
+      " Associa uma pessoa/objeto a grupos distintos ",
+      " Indica relação do tipo junto-separado ",
+    ];
+  }
+  return [
+    "Analisar definições ou realizar cálculos",
+    "Interpretar figuras, tabelas ou algoritmos",
+  ];
 };
 
 export default function ClassificarPage() {
@@ -52,11 +87,11 @@ export default function ClassificarPage() {
       setLoading(true);
       const res = await fetch(`/api/classificar?t=${Date.now()}`, {
         method: "POST",
-        cache: "no-store", 
+        cache: "no-store",
         headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-store",
-         },
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
         body: JSON.stringify({ enunciado, questao: "" }),
       });
 
@@ -68,17 +103,6 @@ export default function ClassificarPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const ResultadoPill = () => {
-    if (!resultado) return null;
-    const s = estiloDaClasse(resultado.classe);
-    return (
-      <div className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium ${s.wrap}`}>
-        <span className="text-base">{s.icon}</span>
-        <span className="font-semibold">{s.label}</span>
-      </div>
-    );
   };
 
   return (
@@ -137,21 +161,39 @@ export default function ClassificarPage() {
             </div>
           )}
 
-          {!loading && resultado && (
-            <div className="space-y-3">
-              <ResultadoPill />
-              <p className="text-sm text-gray-700">
-                {(() => {
-                  const s = estiloDaClasse(resultado.classe);
-                  return (
-                    <>
-                      <span className="font-semibold uppercase">{s.label}:</span> {s.desc}
-                    </>
-                  );
-                })()}
-              </p>
-            </div>
-          )}
+          {!loading && resultado && (() => {
+            const s = estiloDaClasse(resultado.classe);
+            const feats = featuresDaClasse(resultado.classe);
+            return (
+              <div className="rounded-3xl bg-gray-50/60 p-6">
+                {/* ícone central */}
+                <div className="mx-auto mb-4 grid place-items-center">
+                  <div
+                    className={`h-20 w-20 rounded-2xl ${s.iconBg} ring-8 ${s.iconRing} grid place-items-center text-3xl ${s.text}`}
+                  >
+                    {s.icon}
+                  </div>
+                </div>
+
+                {/* título + descrição */}
+                <h4 className="text-2xl font-extrabold text-center mb-1">{s.label}</h4>
+                <p className="text-center text-gray-600 mb-5">{s.desc}</p>
+
+                {/* lista de características */}
+                <div className="space-y-3">
+                  {feats.map((t, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm"
+                    >
+                      <FaCheckCircle className={`${s.text} mt-0.5`} />
+                      <p className="text-sm text-gray-800">{t}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {!loading && !resultado && !erro && (
             <p className="text-sm text-gray-500">
