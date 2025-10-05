@@ -34,7 +34,7 @@ export default function SobrePage() {
 
             <p className="text-justify mt-3 text-[15px] leading-relaxed text-gray-700">
 
-              Nosso App disponibiliza um sistema de classificação automática de questões, explorando técnicas de Inteligência Artificial para organizar e apoiar o processo pedagógico.
+              Nosso App disponibiliza um sistema de classificação automática de questões, explorando técnicas de Inteligência Artificial.
               Além de um repositório digital especializado em questões da OBI, reunindo materiais de estudo para a competição. 
                 
             </p>
