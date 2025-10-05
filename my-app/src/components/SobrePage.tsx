@@ -40,13 +40,12 @@ export default function SobrePage() {
             </p>
 
               <p className="text-justify mt-3 text-[15px] leading-relaxed text-gray-700">
-                  A proposta é oferecer a professores e estudantes um acervo acessível para treinamento, permitindo a criação de trilhas de aprendizado, simulados e atividades alinhadas aos desafios da competição. 
+                Nossa proposta é disponibilizar para professores e estudantes de um acervo acessível com questões da OBI, reunindo os tipos mais frequentes da competição para apoiar o treino e o aprendizado de forma prática.
               </p>
 
-            <p className="text-justify mt-3 text-[15px] leading-relaxed text-gray-700">
-                Este é um projeto open-source, feito para ajudar de verdade quem estuda ou ensina. A ideia é disponibilizar um espaço onde você pode treinar para a OBI e, ao mesmo tempo, explorar problemas de lógica de um jeito simples e acessível.
-            </p>
-
+              <p className="text-justify mt-3 text-[15px] leading-relaxed text-gray-700">
+                Este é um projeto open-source, criado para apoiar quem ensina e quem aprende. Aqui você pode explorar problemas de lógica, revisar questões de anos anteriores e se preparar para a competição de um jeito simples e interativo.
+              </p>
             <div className="mt-5 flex flex-wrap gap-2">
               <Link
                 href="/"
