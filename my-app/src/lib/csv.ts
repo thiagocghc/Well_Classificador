@@ -1,7 +1,7 @@
 
 
-export const PATH_CSV = "/dataset/questoes_classificadas.csv"; 
-export const PATH_CSV_REPOSITORIO = "/dataset/questoes_repositorio.csv";
+export const PATH_CSV = "/dataset/questoes_v2.csv"; 
+export const PATH_CSV_REPOSITORIO = "/dataset/questoes_repositorio_v2.csv";
 
 const CSV_SPLIT_RE = /,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/;
 
