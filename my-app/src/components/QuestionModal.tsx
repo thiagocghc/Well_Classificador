@@ -2,7 +2,9 @@
 import React from "react";
 import type { Questao } from "@/types/questao";
 import { Button } from "@/components/ui";
+import { useTaskList } from "@/contexts/TaskListContext";
 import { FaCalendarAlt, FaStar, FaFlagCheckered } from "react-icons/fa";
+import { FiPlus, FiCheck } from "react-icons/fi";
 
 export default function QuestionModal({
   open,
@@ -13,6 +15,9 @@ export default function QuestionModal({
   onClose: () => void;
   questao?: Questao | null;
 }) {
+  const { add, has } = useTaskList();
+  const added = questao ? has(questao.id) : false;
+
   if (!open || !questao) return null;
 
   const getClasseColor = (classe?: string) => {
@@ -167,8 +172,20 @@ export default function QuestionModal({
           )}
         </div>
 
-        {/* Rodapé */}
-        <div className="mt-6 flex justify-end">
+        {/* Rodape */}
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            onClick={() => add(questao)}
+            disabled={added}
+            className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition ${
+              added
+                ? "bg-emerald-50 text-emerald-600 border border-emerald-200 cursor-default"
+                : "bg-emerald-600 text-white hover:bg-emerald-700"
+            }`}
+          >
+            {added ? <FiCheck size={14} /> : <FiPlus size={14} />}
+            {added ? "Na lista" : "Adicionar a lista"}
+          </button>
           <Button onClick={onClose}>Fechar</Button>
         </div>
       </div>

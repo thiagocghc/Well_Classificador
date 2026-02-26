@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import TaskListPanel from "@/components/TaskListPanel";
+import { TaskListProvider } from "@/contexts/TaskListContext";
 import { Roboto } from "next/font/google";
 
 const roboto = Roboto({
@@ -34,8 +36,11 @@ export default function RootLayout({
       <body
         className={`${roboto.className} antialiased`}
       >
-        <Navbar />
-        {children}
+        <TaskListProvider>
+          <Navbar />
+          {children}
+          <TaskListPanel />
+        </TaskListProvider>
       </body>
     </html>
   );

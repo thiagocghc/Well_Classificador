@@ -2,11 +2,13 @@
 import React from "react";
 import type { Questao } from "@/types/questao";
 import { Badge, Button } from "@/components/ui";
+import { useTaskList } from "@/contexts/TaskListContext";
 import {
   FaCalendarAlt,
   FaFlagCheckered,
   FaStar,
 } from "react-icons/fa";
+import { FiPlus, FiCheck } from "react-icons/fi";
 
 export default function QuestionCard({
   q,
@@ -15,6 +17,8 @@ export default function QuestionCard({
   q: Questao;
   onOpen: (q: Questao) => void;
 }) {
+  const { add, has } = useTaskList();
+  const added = has(q.id);
   // Definir cores para cada classe
   const getClasseColor = (classe?: string) => {
     switch ((classe || "").toLowerCase()) {
@@ -63,6 +67,19 @@ export default function QuestionCard({
 
       <div className="mt-3 flex items-center gap-2">
         <Button onClick={() => onOpen(q)}>Ver mais</Button>
+        <button
+          onClick={() => add(q)}
+          disabled={added}
+          className={`inline-flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-medium transition ${
+            added
+              ? "bg-emerald-50 text-emerald-600 border border-emerald-200 cursor-default"
+              : "bg-gray-100 text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 border border-gray-200"
+          }`}
+          aria-label={added ? "Ja adicionada" : "Adicionar a lista"}
+        >
+          {added ? <FiCheck size={14} /> : <FiPlus size={14} />}
+          {added ? "Na lista" : "Adicionar"}
+        </button>
       </div>
     </article>
   );
