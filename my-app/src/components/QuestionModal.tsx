@@ -2,16 +2,22 @@
 import React from "react";
 import type { Questao } from "@/types/questao";
 import { Button } from "@/components/ui";
-import { FaCalendarAlt, FaStar, FaFlagCheckered } from "react-icons/fa";
+import { FaCalendarAlt, FaStar, FaFlagCheckered, FaCheck } from "react-icons/fa";
 
 export default function QuestionModal({
   open,
   onClose,
   questao,
+  onAdd,
+  onRemove,
+  inTrail = false,
 }: {
   open: boolean;
   onClose: () => void;
   questao?: Questao | null;
+  onAdd?: (q: Questao) => void;
+  onRemove?: (q: Questao) => void;
+  inTrail?: boolean;
 }) {
   if (!open || !questao) return null;
 
@@ -49,7 +55,7 @@ export default function QuestionModal({
       .filter(Boolean) as { label: string; text: string }[];
   };
 
-  // campos do dataset
+  // campos do dataset (podem existir além do tipo Questao)
   const numeroQuestao =
     (questao as any)?.numero_questao ??
     (questao as any)?.numero ??
@@ -63,7 +69,7 @@ export default function QuestionModal({
     "";
 
   const formatPergunta = (num: number | string | null, txt: string) => {
-    const n = (num !== null && String(num).trim() !== "") ? `${num}. ` : "";
+    const n = num !== null && String(num).trim() !== "" ? `${num}. ` : "";
     return `${n}${txt}`.trim();
   };
 
@@ -79,8 +85,8 @@ export default function QuestionModal({
   const texto = questao.textoCompleto || questao.enunciado || "(Sem texto completo)";
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-2" role="dialog" aria-modal="true">
-      {/* backdrop escuro */}
+    <div className="fixed inset-0 z-[1100] flex items-end sm:items-center justify-center p-2" role="dialog" aria-modal="true">
+      {/* backdrop */}
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
 
       {/* painel */}
@@ -121,6 +127,12 @@ export default function QuestionModal({
                   {normalizeClasse(questao.classe)}
                 </span>
               </div>
+
+              {inTrail && (
+                <div className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                  <FaCheck /> Na trilha
+                </div>
+              )}
             </div>
           </div>
 
@@ -131,7 +143,6 @@ export default function QuestionModal({
 
         {/* Conteúdo */}
         <div className="mt-4 max-h-[60vh] overflow-auto pr-1 text-sm text-gray-800 space-y-4">
-          {/* Enunciado */}
           <div>
             <h4 className="text-sm font-semibold text-gray-900 mb-2">Enunciado</h4>
             <div className="rounded-xl border border-gray-200 bg-white p-3">
@@ -139,19 +150,15 @@ export default function QuestionModal({
             </div>
           </div>
 
-          {/* Pergunta (com número junto) */}
           {(pergunta || numeroQuestao !== null) && (
             <div>
               <h4 className="text-sm font-semibold text-gray-900 mb-2">Pergunta</h4>
               <div className="rounded-xl border border-gray-200 bg-white p-3">
-                <p className="whitespace-pre-wrap leading-relaxed">
-                  {formatPergunta(numeroQuestao, pergunta)}
-                </p>
+                <p className="whitespace-pre-wrap leading-relaxed">{formatPergunta(numeroQuestao, pergunta)}</p>
               </div>
             </div>
           )}
 
-          {/* Alternativas */}
           {alternativas.length > 0 && (
             <div>
               <h4 className="text-sm font-semibold text-gray-900 mb-2">Alternativas</h4>
@@ -168,8 +175,16 @@ export default function QuestionModal({
         </div>
 
         {/* Rodapé */}
-        <div className="mt-6 flex justify-end">
-          <Button onClick={onClose}>Fechar</Button>
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex gap-2">
+            {onAdd && !inTrail && (
+              <Button onClick={() => onAdd(questao)}>Adicionar à trilha</Button>
+            )}
+            {onRemove && inTrail && (
+              <Button variant="outline" onClick={() => onRemove(questao)}>Remover da trilha</Button>
+            )}
+          </div>
+          <Button variant="ghost" onClick={onClose}>Fechar</Button>
         </div>
       </div>
     </div>

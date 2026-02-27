@@ -5,6 +5,8 @@ import { useCsvData } from "@/hooks/useCsvData";
 import FilterBar from "@/components/FilterBar";
 import QuestionCard from "@/components/QuestionCard";
 import QuestionModal from "@/components/QuestionModal";
+import StudyTrailDrawer from "@/components/StudyTrailDrawer";
+import { useStudyTrail } from "@/hooks/useStudyTrail";
 
 export default function HomePage() {
   const { data: raw, loaded, error } = useCsvData();
@@ -12,6 +14,8 @@ export default function HomePage() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<Questao | null>(null);
+
+  const trail = useStudyTrail();
 
   useEffect(() => {
     setFilters({ ano: "", nivel: "", fase: "", classe: "" });
@@ -63,6 +67,7 @@ export default function HomePage() {
                 setActive(qq);
                 setOpen(true);
               }}
+              inTrail={trail.has(q)}
             />
           ))}
           {loaded && filtered.length === 0 && (
@@ -74,7 +79,9 @@ export default function HomePage() {
       </section>
     </div>
 
-    <QuestionModal open={open} onClose={() => setOpen(false)} questao={active} />
+    <QuestionModal open={open} onClose={() => setOpen(false)} questao={active} onAdd={trail.add} onRemove={trail.remove} inTrail={active ? trail.has(active) : false} />
+
+    <StudyTrailDrawer items={trail.items} onRemove={trail.remove} onClear={trail.clear} />
   </div>
   );
 }

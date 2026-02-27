@@ -1,21 +1,18 @@
 "use client";
 import React from "react";
 import type { Questao } from "@/types/questao";
-import { Badge, Button } from "@/components/ui";
-import {
-  FaCalendarAlt,
-  FaFlagCheckered,
-  FaStar,
-} from "react-icons/fa";
+import { Button } from "@/components/ui";
+import { FaCalendarAlt, FaFlagCheckered, FaStar, FaCheck } from "react-icons/fa";
 
 export default function QuestionCard({
   q,
   onOpen,
+  inTrail = false,
 }: {
   q: Questao;
   onOpen: (q: Questao) => void;
+  inTrail?: boolean;
 }) {
-  // Definir cores para cada classe
   const getClasseColor = (classe?: string) => {
     switch ((classe || "").toLowerCase()) {
       case "ordenação":
@@ -27,7 +24,6 @@ export default function QuestionCard({
     }
   };
 
-  // Capitalizar título (tipo "Roland Garros")
   const capitalizeTitle = (t: string) =>
     t.replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase());
 
@@ -50,16 +46,19 @@ export default function QuestionCard({
         >
           {q.classe}
         </span>
+
+        {inTrail && (
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+            <FaCheck /> Na trilha
+          </span>
+        )}
       </div>
 
-      {/* aplicar capitalizeTitle aqui */}
       <h3 className="text-base font-semibold text-gray-900">
         {q.titulo ? capitalizeTitle(q.titulo) : `Questão ${q.id}`}
       </h3>
 
-      {q.enunciado && (
-        <p className="mt-1 text-sm text-gray-700 line-clamp-3">{q.enunciado}</p>
-      )}
+      {q.enunciado && <p className="mt-1 text-sm text-gray-700 line-clamp-3">{q.enunciado}</p>}
 
       <div className="mt-3 flex items-center gap-2">
         <Button onClick={() => onOpen(q)}>Ver mais</Button>
