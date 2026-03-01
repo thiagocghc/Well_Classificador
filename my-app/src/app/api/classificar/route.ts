@@ -48,7 +48,6 @@ async function runGate(client: OpenAI, fullText: string) {
   const completion = await client.chat.completions.create({
     model: GATE_MODEL,
     response_format: { type: "json_object" },
-    temperature: 0,
     messages: [
       { role: "system", content: GATE_SYSTEM },
       { role: "user", content: buildGateUserPrompt(fullText) },
