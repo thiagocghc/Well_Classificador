@@ -28,7 +28,6 @@ Regras:
 - "ok": true SOMENTE se (1) e (2) forem verdadeiros.
 - Se não for português, use lang="other".
 - Se não der para ter certeza, use lang="unknown".
-- Se não parecer questão, ok=false.
 - Seja conservador: se estiver em dúvida, ok=false e lang="unknown".
 `;
 
