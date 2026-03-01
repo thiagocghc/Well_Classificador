@@ -5,22 +5,16 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
+}
 
-/**
- * ✅ GATE: valida se o texto é (a) português e (b) parece uma questão.
- * Se não for, retornamos "desconhecida" sem chamar o classificador.
- *
- * Importante:
- * - prompt curto
- * - temperature 0
- * - response_format JSON
- * - enviamos apenas um recorte do texto para economizar tokens
- */
 const GATE_SYSTEM = `
 Você é um validador de entrada. Verifique se o texto recebido:
 (1) está em português (pt-BR ou pt-PT) e
-(2) parece o texto de uma questão (enunciado e/ou pergunta e/ou alternativas), e não um texto aleatório.
+(2) e não um texto aleatório.
 
 Responda APENAS em JSON no formato:
 {
@@ -38,25 +32,19 @@ Regras:
 - Seja conservador: se estiver em dúvida, ok=false e lang="unknown".
 `;
 
-/**
- * Model do gate (opcional via env). Pode ser o mesmo do classificador.
- * Se quiser deixar mais barato, configure OPENAI_GATE_MODEL com um modelo mais econômico.
- */
-const GATE_MODEL = process.env.OPENAI_GATE_MODEL || process.env.OPENAI_MODEL || "gpt-4.1-mini";
+
+const GATE_MODEL = process.env.OPENAI_GATE_MODEL || process.env.OPENAI_MODEL || "gpt-5-mini";
 
 /** Threshold recomendado. Aumente (0.75) se quiser mais rigor. */
 const GATE_MIN_CONFIDENCE = Number(process.env.OPENAI_GATE_MIN_CONFIDENCE || 0.65);
 
-/**
- * Prompt do gate (recorte para reduzir custo).
- * 1800 chars costuma ser suficiente para detectar língua + estrutura.
- */
+
 function buildGateUserPrompt(fullText: string) {
   const snippet = (fullText || "").trim().slice(0, 1800);
   return `TEXTO:\n"""${snippet}"""`;
 }
 
-async function runGate(fullText: string) {
+async function runGate(client: OpenAI, fullText: string) {
   const completion = await client.chat.completions.create({
     model: GATE_MODEL,
     response_format: { type: "json_object" },
@@ -151,14 +139,14 @@ Agora, classifique a seguinte questão, responda **apenas** em JSON:
 
 export async function POST(req: Request) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
+    const client = getOpenAIClient();
+    if (!client) {
       return new Response(JSON.stringify({ error: "Faltou OPENAI_API_KEY" }), {
         status: 500,
-        headers: { "Cache-Control": "no-store" },
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
       });
     }
-
-    const { enunciado = "", questao = "" } = await req.json();
+const { enunciado = "", questao = "" } = await req.json();
 
     // LOG de entrada (servidor)
     console.log("[classificar] ENUNCIADO length:", enunciado.length);
@@ -167,7 +155,7 @@ export async function POST(req: Request) {
     const fullText = `${enunciado}\n\n${questao || ""}`.trim();
 
     // ✅ 1) GATE primeiro (sem heurística determinística)
-    const gate = await runGate(fullText);
+    const gate = await runGate(client, fullText);
 
     console.log("[classificar] gate:", {
       ok: gate.ok,
@@ -215,9 +203,8 @@ export async function POST(req: Request) {
     ];
 
     const completion = await client.chat.completions.create({
-      model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
+      model: process.env.OPENAI_MODEL || "gpt-5-mini",
       response_format: { type: "json_object" },
-      temperature: 0,
       messages,
     });
 

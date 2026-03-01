@@ -82,9 +82,8 @@ const featuresDaClasse = (c: string): string[] => {
 
   if (classe === "desconhecida") {
     return [
-      "Cole o enunciado completo da questão (contexto + pergunta).",
-      "Se houver alternativas (A–E), inclua também.",
-      "Evite textos aleatórios, siglas soltas ou apenas risadas/ruídos.",
+      "Cole o enunciado completo da questão.",
+      "Evite textos aleatórios ou fora do padrão OBI.",
     ];
   }
 
