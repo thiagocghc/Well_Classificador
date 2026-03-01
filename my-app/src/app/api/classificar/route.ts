@@ -7,18 +7,104 @@ export const fetchCache = "force-no-store";
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const SYSTEM_MESSAGE = `
- "Você é um especialista em classificar questões da OBI em três categorias específicas: ORDENAÇÃO, AGRUPAMENTO e OUTROS.\n\n"
-    "Siga este raciocínio passo a passo antes de classificar:\n"
+/**
+ * ✅ GATE: valida se o texto é (a) português e (b) parece uma questão.
+ * Se não for, retornamos "desconhecida" sem chamar o classificador.
+ *
+ * Importante:
+ * - prompt curto
+ * - temperature 0
+ * - response_format JSON
+ * - enviamos apenas um recorte do texto para economizar tokens
+ */
+const GATE_SYSTEM = `
+Você é um validador de entrada. Verifique se o texto recebido:
+(1) está em português (pt-BR ou pt-PT) e
+(2) parece o texto de uma questão (enunciado e/ou pergunta e/ou alternativas), e não um texto aleatório.
 
-    "1. O objetivo principal da questão é definir ordem de objetos, posição ou arranjo ordenado? Isso inclui ordem explícita (1º, 2º, etc.) ou implícita (antes/depois, vizinhança, restrições de posição)? → Classifique como ORDENAÇÃO.\n"
-    "2. A questão foca na atribuição de objetos a um grupo? formação de subconjuntos ou seleção de elementos, sem considerar a ordem entre eles? → Classifique como AGRUPAMENTO.\n"
-    "3. A questão envolve principalmente o cálculos de valores, análise de imagens, estruturas como grafos, tabelas ou algoritmos? → Classifique como OUTROS.\n"
-    "Árvore de decisão baseada em regras:"
-    "1. Teste ORDEM/POSICIONAMENTO → Associa uma pessoa/objeto a uma lista de posições específicas ou envolver restrições de ordem ou vizinhança → ORDENAÇÃO."
-    "2. Teste GRUPOS/SUBCONJUNTOS → Associa pessoa/objeto a grupos distintos ou indica relação do tipo junto-separado, sem qualquer relevância para a ordem → AGRUPAMENTO."
-    "3. Teste NÚMEROS/CÁLCULO/ESTRUTURAS → Envolve uma explicação baseada em propriedades matemáticas ou interpreta grafos/mapas/tabelas/figuras → OUTROS."
-    "Finalize sempre com: Classificação Final: [ordenação|agrupamento|outros]"
+Responda APENAS em JSON no formato:
+{
+  "ok": true|false,
+  "lang": "pt"|"other"|"unknown",
+  "confidence": 0-1,
+  "reason": "..."
+}
+
+Regras:
+- "ok": true SOMENTE se (1) e (2) forem verdadeiros.
+- Se não for português, use lang="other".
+- Se não der para ter certeza, use lang="unknown".
+- Se não parecer questão, ok=false.
+- Seja conservador: se estiver em dúvida, ok=false e lang="unknown".
+`;
+
+/**
+ * Model do gate (opcional via env). Pode ser o mesmo do classificador.
+ * Se quiser deixar mais barato, configure OPENAI_GATE_MODEL com um modelo mais econômico.
+ */
+const GATE_MODEL = process.env.OPENAI_GATE_MODEL || process.env.OPENAI_MODEL || "gpt-4.1-mini";
+
+/** Threshold recomendado. Aumente (0.75) se quiser mais rigor. */
+const GATE_MIN_CONFIDENCE = Number(process.env.OPENAI_GATE_MIN_CONFIDENCE || 0.65);
+
+/**
+ * Prompt do gate (recorte para reduzir custo).
+ * 1800 chars costuma ser suficiente para detectar língua + estrutura.
+ */
+function buildGateUserPrompt(fullText: string) {
+  const snippet = (fullText || "").trim().slice(0, 1800);
+  return `TEXTO:\n"""${snippet}"""`;
+}
+
+async function runGate(fullText: string) {
+  const completion = await client.chat.completions.create({
+    model: GATE_MODEL,
+    response_format: { type: "json_object" },
+    temperature: 0,
+    messages: [
+      { role: "system", content: GATE_SYSTEM },
+      { role: "user", content: buildGateUserPrompt(fullText) },
+    ],
+  });
+
+  const content = completion.choices[0]?.message?.content ?? "{}";
+
+  try {
+    const data = JSON.parse(content);
+    return {
+      ok: Boolean(data.ok),
+      lang: String(data.lang || "unknown") as "pt" | "other" | "unknown",
+      confidence: Number(data.confidence || 0),
+      reason: String(data.reason || ""),
+      raw: data,
+    };
+  } catch {
+    return {
+      ok: false,
+      lang: "unknown" as const,
+      confidence: 0,
+      reason: "gate_parse_error",
+      raw: {},
+    };
+  }
+}
+
+const SYSTEM_MESSAGE = `
+Você é um especialista em classificar questões da OBI em três categorias específicas: ORDENAÇÃO, AGRUPAMENTO e OUTROS.
+
+Siga este raciocínio passo a passo antes de classificar:
+
+1. O objetivo principal da questão é definir ordem de objetos, posição ou arranjo ordenado? Isso inclui ordem explícita (1º, 2º, etc.) ou implícita (antes/depois, vizinhança, restrições de posição)? → Classifique como ORDENAÇÃO.
+2. A questão foca na atribuição de objetos a um grupo? formação de subconjuntos ou seleção de elementos, sem considerar a ordem entre eles? → Classifique como AGRUPAMENTO.
+3. A questão envolve principalmente o cálculos de valores, análise de imagens, estruturas como grafos, tabelas ou algoritmos? → Classifique como OUTROS.
+
+Árvore de decisão baseada em regras:
+1. Teste ORDEM/POSICIONAMENTO → Associa uma pessoa/objeto a uma lista de posições específicas ou envolver restrições de ordem ou vizinhança → ORDENAÇÃO.
+2. Teste GRUPOS/SUBCONJUNTOS → Associa pessoa/objeto a grupos distintos ou indica relação do tipo junto-separado, sem qualquer relevância para a ordem → AGRUPAMENTO.
+3. Teste NÚMEROS/CÁLCULO/ESTRUTURAS → Envolve uma explicação baseada em propriedades matemáticas ou interpreta grafos/mapas/tabelas/figuras → OUTROS.
+
+Responda APENAS em JSON:
+{"classe":"ordenacao|agrupamento|outros"}
 `;
 
 const PROMPT_TEMPLATE = `
@@ -78,11 +164,50 @@ export async function POST(req: Request) {
     console.log("[classificar] ENUNCIADO length:", enunciado.length);
     console.log("[classificar] QUESTAO length:", questao.length);
 
-    const messages: ChatCompletionMessageParam[]  = [
+    const fullText = `${enunciado}\n\n${questao || ""}`.trim();
+
+    // ✅ 1) GATE primeiro (sem heurística determinística)
+    const gate = await runGate(fullText);
+
+    console.log("[classificar] gate:", {
+      ok: gate.ok,
+      lang: gate.lang,
+      confidence: gate.confidence,
+      reason: gate.reason,
+    });
+
+    // Se não passar, não chamamos o classificador.
+    // Você pediu: se retornar unknown/desconhecida, tratar no frontend depois.
+    if (!gate.ok || gate.lang !== "pt" || gate.confidence < GATE_MIN_CONFIDENCE) {
+      return new Response(
+        JSON.stringify({
+          classe: "desconhecida",
+          error: "Texto não reconhecido como uma questão válida em português.",
+          gate: {
+            ok: gate.ok,
+            lang: gate.lang,
+            confidence: gate.confidence,
+            reason: gate.reason,
+          },
+        }),
+        {
+          status: 200, // mantém 200 para o frontend exibir card (como você comentou). Se preferir, pode ser 400.
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            "CDN-Cache-Control": "no-store",
+            "Vercel-CDN-Cache-Control": "no-store",
+          },
+        }
+      );
+    }
+
+    // ✅ 2) Classificador (prompt original) somente se passar no gate
+    const messages: ChatCompletionMessageParam[] = [
       { role: "system", content: SYSTEM_MESSAGE },
-
       { role: "user", content: PROMPT_TEMPLATE },
-
       {
         role: "user",
         content: `Enunciado:\n${enunciado}\n\nQuestão:\n${questao || "(sem pergunta)"}`,
@@ -92,6 +217,7 @@ export async function POST(req: Request) {
     const completion = await client.chat.completions.create({
       model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
       response_format: { type: "json_object" },
+      temperature: 0,
       messages,
     });
 
@@ -110,7 +236,8 @@ export async function POST(req: Request) {
     let classeRaw = String(data.classe ?? data.classificacao ?? "outros").toLowerCase();
     if (classeRaw === "ordenacao" || classeRaw === "ordenação") classeRaw = "ordenação";
     else if (classeRaw === "agrupamento") classeRaw = "agrupamento";
-    else classeRaw = "outros";
+    else if (classeRaw === "outros") classeRaw = "outros";
+    else classeRaw = "outros"; // fallback seguro
 
     // LOG
     console.log("[classificar] classe normalizada:", classeRaw);
@@ -118,12 +245,12 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ classe: classeRaw }), {
       status: 200,
       headers: {
-            "Content-Type": "application/json",
-            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-            "Pragma": "no-cache",
-            "Expires": "0",
-            "CDN-Cache-Control": "no-store",
-            "Vercel-CDN-Cache-Control": "no-store",
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+        "CDN-Cache-Control": "no-store",
+        "Vercel-CDN-Cache-Control": "no-store",
       },
     });
   } catch (err) {
