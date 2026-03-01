@@ -82,7 +82,7 @@ const featuresDaClasse = (c: string): string[] => {
 
   if (classe === "desconhecida") {
     return [
-      "Cole o enunciado completo da questão.",
+      "Cole um texto com o enunciado completo da questão.",
       "Evite textos aleatórios ou fora do padrão OBI.",
     ];
   }
@@ -257,8 +257,7 @@ export default function ClassificarPage() {
                     {s.label}
                   </h4>
                   <p className="text-center text-gray-700 mb-5">
-                    Não parece ser uma questão da OBI. Cole um texto com <b>enunciado</b> e{" "}
-                    <b>pergunta</b> (e alternativas, se houver).
+                    Não parece ser uma questão da OBI.
                   </p>
 
                   <div className="space-y-3">
